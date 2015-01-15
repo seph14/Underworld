@@ -77,7 +77,7 @@ function LoadMat( texDiffuse, texNormal, name ){
 			
 	uniforms[ "uBaseColor"].value     	= new THREE.Color( 0x413e3c );
 	
-	uniforms[ "uLightPositions"].value	= [ new THREE.Vector3( 0, 300, 0 ), new THREE.Vector3( 200, 0, 200 ) ];
+	uniforms[ "uLightPositions"].value	= [ new THREE.Vector3( -200, 60, -200 ), new THREE.Vector3( 200, 0, 200 ) ];
 	uniforms[ "uLightRadiuses"].value   = [ 25.0, 25.0 ];
 	uniforms[ "uLightColors" ].value	= [ new THREE.Vector3( 119, 132, 153 ), new THREE.Vector3( 73, 84, 104 ) ];
 					
