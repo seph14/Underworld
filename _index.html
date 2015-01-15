@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+	<title>Rock Prototype</title>
+</head>
+
+<body>	
+	<script type="text/javascript" src="framework/three.min.js"></script>
+	<script type="text/javascript" src="framework/physi.js"></script>
+	<script type="text/javascript" src="framework/stats.js"></script>
+	<!--<script type="text/javascript" src="framework/ThreeJS_Lib/loaders/OBJLoader.js"></script>--> <!-- the current obj loader directly load files into gpu buffers which is not what we need for physics engine, need to fall back one version, will revisit this part later -->
+	<script type="text/javascript" src="framework/ThreeJS_Lib/loaders/ObjLoaderGeometry.js"></script>
+	<script type="text/javascript" src="framework/ThreeJS_Lib/SimplexNoise.js"></script>
+	<script type="text/javascript" src="js/controller.js"></script>
+	<div id="viewport"></div>
+</body>
+
+</html>

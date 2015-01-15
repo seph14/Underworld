@@ -10,6 +10,7 @@ var NEAR = 1;
 
 var container, stats;
 var camera, scene, renderer;
+var cameraCube, sceneCube, skyMesh;
 var ambientLight, sunLight;
 var camControl;
 
@@ -33,15 +34,18 @@ function initScene() {
 		stats.domElement.style.zIndex = 100;
 		container.appendChild( stats.domElement );
 	}
-	
+
 	// SCENE
 	scene = new THREE.Scene();
+	sceneCube = new THREE.Scene();
 	scene.fog = new THREE.Fog( 0xcdcdcd, 1000, FAR );
 
 	// CAMERA
 	camera = new THREE.PerspectiveCamera( 45, SCREEN_WIDTH / SCREEN_HEIGHT, NEAR, FAR );
 	camera.position.set( 80, -130, 80 );
 	camera.lookAt( scene.position );
+
+	cameraCube = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 100000 );
 	
 	var sunIntensity = 0.5;
 
@@ -65,7 +69,7 @@ function initScene() {
 
 	// RENDERER
 	renderer = new THREE.WebGLRenderer( { antialias: false } );
-	renderer.setClearColor( scene.fog.color, 1 );
+	//renderer.setClearColor( scene.fog.color, 1 );
 	renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
 
 	renderer.domElement.style.position = "absolute";
@@ -97,32 +101,67 @@ function initScene() {
 
 	camControl.keys = [ 65, 83, 68 ];
 
+	//skybox
+	var path = "textures/skybox/";
+	var format = '.jpg';
+	var urls = [
+				path + 'px' + format, path + 'nx' + format,
+				path + 'py' + format, path + 'ny' + format,
+				path + 'pz' + format, path + 'nz' + format
+			];
+	var textureCube = THREE.ImageUtils.loadTextureCube( urls, new THREE.CubeRefractionMapping() );
+	
+	var shader = THREE.ShaderLib[ "cube" ];
+	shader.uniforms[ "tCube" ].value = textureCube;
+
+	var material = new THREE.ShaderMaterial( {
+		fragmentShader: shader.fragmentShader,
+		vertexShader: 	shader.vertexShader,
+		uniforms: 		shader.uniforms,
+		depthWrite: 	false,
+		side: 			THREE.BackSide
+	} );
+
+	skyMesh = new THREE.Mesh( new THREE.BoxGeometry( FAR, FAR, FAR ), material );
+	sceneCube.add( skyMesh );		
+
 	// EVENTS
 	window.addEventListener  ( 'resize',  onWindowResize, false );
 	document.addEventListener( 'keydown', onKeyDown,      false );
 
 	// COMPOSER
 
-	renderer.autoClear = false;
-
-	var renderTargetParameters = { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat, stencilBuffer: false };
+	var renderTargetParameters = { minFilter: 		THREE.LinearFilter, 
+								   magFilter: 		THREE.LinearFilter, 
+								   format: 			THREE.RGBFormat, 
+								   stencilBuffer: 	false };
 	var renderTarget = new THREE.WebGLRenderTarget( SCREEN_WIDTH, SCREEN_HEIGHT, renderTargetParameters );
-	var renderModel = new THREE.RenderPass( scene, camera );
+	var renderSky    = new THREE.RenderPass( sceneCube, cameraCube );
+	var renderModel  = new THREE.RenderPass( scene, camera );
+
+	renderer.autoClear = false;
+	renderModel.clear = false;
 
 	effectFXAA = new THREE.ShaderPass( THREE.FXAAShader );
 	effectFXAA.uniforms[ 'resolution' ].value.set( 1 / SCREEN_WIDTH, 1 / SCREEN_HEIGHT );
 	effectFXAA.renderToScreen = true;
 
 	composer = new THREE.EffectComposer( renderer, renderTarget );
+	composer.addPass( renderSky   );
 	composer.addPass( renderModel );
 	composer.addPass( effectFXAA );
 
-	LoadMat("Rock_A_01_Diffuse.png","Rock_A_01_Normal.png","PBR_Bump");
-	CreateRock("Rock",185,".obj", 20);
+	LoadMat("Rock_A_01_Diffuse.png",
+			"Rock_A_01_Normal.png",
+			"PBR_Bump", 
+			"PBR_Color");
+	
+	var rock = CreateRock(0, 153, 20);
+	camera.lookAt( rock.bound.center() );
 
-	if( debug ){
-		CreateRockGUI();
-	}
+	//if( debug ){
+	//	CreateRockGUI();
+	//}
 
 	animate();
 }
@@ -133,6 +172,9 @@ function onWindowResize() {
 
 	camera.aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
 	camera.updateProjectionMatrix();
+
+	cameraCube.aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
+	cameraCube.updateProjectionMatrix();
 
 	renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
 	composer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
@@ -162,7 +204,10 @@ function animate() {
 function render() {
 	// update
 	camControl.update();
-
+	cameraCube.rotation.copy( camera.rotation );
+	skyMesh.position.x = camera.position.x;
+	skyMesh.position.y = camera.position.y;
+	skyMesh.position.z = camera.position.z;
 	// render scene
 
 	//renderer.render( scene, camera );

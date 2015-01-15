@@ -21,7 +21,7 @@ function RockAssemble () {
 	this.core  		= null; //core rock reference
 	this.crack 		= [];   //crack rock array
 
-    this.pos 		= new THREE.Vector3(0,1,0);
+    this.pos 		= new THREE.Vector3(0,0,0);
     this.bound 		= new THREE.Box3(new THREE.Vector3( -0.0, -0.0, -0.0 ), new THREE.Vector3( +0.0, +0.0, +0.0 ));
 }
 
@@ -55,8 +55,8 @@ function RockCore () {
 //RockAssemble.prototype.getInfo = function() {
 //};
 
-function LoadMat( texDiffuse, texNormal, name ){
-	var shader 	 = THREE.ShaderPBR[ name ];
+function LoadMat( texDiffuse, texNormal, nameRock, nameMonolite ){
+	var shader 	 = THREE.ShaderPBR[ nameRock ];
 	var uniforms = THREE.UniformsUtils.clone( shader.uniforms );
 
 	uniforms[ "uBaseColorMap" ].value 		= THREE.ImageUtils.loadTexture( "textures/" + texDiffuse );
@@ -81,10 +81,43 @@ function LoadMat( texDiffuse, texNormal, name ){
 	uniforms[ "uLightRadiuses"].value   = [ 25.0, 25.0 ];
 	uniforms[ "uLightColors" ].value	= [ new THREE.Vector3( 119, 132, 153 ), new THREE.Vector3( 73, 84, 104 ) ];
 					
-	var parameters = { fragmentShader: shader.fragmentShader, vertexShader: shader.vertexShader, uniforms: uniforms, lights: false, fog: true };
+	var parameters = { fragmentShader: 	shader.fragmentShader, 
+					   vertexShader: 	shader.vertexShader, 
+					   uniforms: 		uniforms, 
+					   lights: 			false, 
+					   fog: 			true,
+					   morphTargets:    false,
+					   morphNormals:    false,
+					   shading: 		THREE.FlatShading };
 	rockMat = new THREE.ShaderMaterial( parameters );
 
+
+	var shadermono 	 = THREE.ShaderPBR[ nameMonolite ];
+	var uniformsmono = THREE.UniformsUtils.clone( shadermono.uniforms );
+
+	uniformsmono[ "uRoughness" ].value    	= 1.0;	
+	uniformsmono[ "uMetallic"  ].value    	= 1.0;	
+	uniformsmono[ "uSpecular"  ].value    	= 1.0;	
+			
+	uniformsmono[ "uExposure"  ].value    	= 19.3375;
+	uniformsmono[ "uGamma" 	   ].value    	= 2.2;
+			
+	uniformsmono[ "uBaseColor"].value     	= new THREE.Color( 0xffffff );
 	
+	uniformsmono[ "uLightPositions"].value	= [ new THREE.Vector3( -200, 60, -200 ), new THREE.Vector3( 200, 0, 200 ) ];
+	uniformsmono[ "uLightRadiuses"].value   = [ 25.0, 25.0 ];
+	uniformsmono[ "uLightColors" ].value	= [ new THREE.Vector3( 119, 132, 153 ), new THREE.Vector3( 73, 84, 104 ) ];
+					
+	var parametersmono = { fragmentShader: 	shadermono.fragmentShader, 
+						   vertexShader: 	shadermono.vertexShader, 
+						   uniforms: 		uniformsmono, 
+						   lights: 			false, 
+					       fog: 			true,
+					       morphTargets:    false,
+					       morphNormals:    false,
+					       shading: 		THREE.FlatShading };
+	coreMat = new THREE.ShaderMaterial( parametersmono );
+
 	/*var manager = new THREE.LoadingManager();
 	manager.onProgress = function ( item, loaded, total ) { };
 	var loader = new THREE.ImageLoader( manager );
@@ -106,7 +139,7 @@ function LoadMat( texDiffuse, texNormal, name ){
 	return rockMat;
 }
 
-function CreateRock( path, cnt, format, scale ){
+/*function CreateRock( path, cnt, format, scale ){
 	var manager = new THREE.LoadingManager();
 	manager.onProgress = function ( item, loaded, total ) { };
 	
@@ -143,6 +176,69 @@ function CreateRock( path, cnt, format, scale ){
 			} );
 		}, onProgress, onError );
 	};
+
+	return rock;
+}*/
+
+//TODO: need to compile OBJs into json files for fast loading
+function CreateRock( idx, cnt, scale ){
+	var manager = new THREE.LoadingManager();
+	manager.onProgress = function ( item, loaded, total ) { };
+	
+	var rock = new RockAssemble();
+
+	var matrix = new THREE.Matrix4;
+	matrix.multiplyScalar(scale);
+
+	var onProgress 	= function ( xhr ) { };
+	var onError 	= function ( xhr ) { trace("file not found"); };
+
+	// model
+	var loader = new THREE.OBJLoader( manager );
+
+	var root = "models/RockHollow" + idx + "/Rock";
+	for (var i = 1; i <= cnt; i++) {
+		var str = root + i + ".obj";
+		loader.load( str, function ( object ) {
+			object.traverse( function ( child ) {
+				if ( child instanceof THREE.Mesh ) {
+					child.material = rockMat;
+				
+					child.applyMatrix(matrix);
+
+					if(Math.random() < 0.5){
+						child.position.x = Math.random() * 500 - 250;
+						child.position.y = Math.random() * 500 - 250;
+						child.position.z = Math.random() * 500 - 250;
+					}
+					
+					var crack = new RockCrack();
+					child.geometry.computeBoundingBox ();
+					rock.bound.union(child.geometry.boundingBox);
+					crack.mesh = child;
+				
+					rock.crack.push(crack);
+					scene.add(child);
+				}
+			} );
+		}, onProgress, onError );
+	}
+
+	var str = "models/Monolite" + idx + ".obj";
+	loader.load( str, function ( object ) {
+		object.traverse( function ( child ) {
+			if ( child instanceof THREE.Mesh ) {
+				child.material = coreMat;
+				child.applyMatrix(matrix);
+				var core = new RockCore();
+				child.geometry.computeBoundingBox ();
+				rock.bound.union(child.geometry.boundingBox);
+				core.mesh = child;
+				rock.core = core;
+				scene.add(child);
+			}
+		} );
+	}, onProgress, onError );
 
 	return rock;
 }
