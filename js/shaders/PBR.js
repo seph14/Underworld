@@ -257,8 +257,8 @@ THREE.ShaderPBR = {
 			THREE.ShaderChunk[ "shadowmap_pars_vertex" ],
 
 			"void main(){",
-    			"vec4 worldSpacePosition	= modelMatrix * vec4(position,1.0);",
-    			"vec4 viewSpacePosition		= viewMatrix * worldSpacePosition;",
+    			"vec4 worldPosition			= modelMatrix * vec4(position,1.0);",
+    			"vec4 viewSpacePosition		= viewMatrix * worldPosition;",
 	
 				"vNormal 					= normalize( normalMatrix * normal );",
 				"vLightPositions[0]			= ( viewMatrix * vec4( uLightPositions[0], 1.0 ) ).xyz;",
@@ -486,8 +486,9 @@ THREE.ShaderPBR = {
 			THREE.ShaderChunk[ "shadowmap_pars_vertex" ],
 
 			"void main(){",
-    			"vec4 worldSpacePosition	= modelMatrix * vec4(position,1.0);",
-    			"vec4 viewSpacePosition		= viewMatrix * worldSpacePosition;",
+
+    			"vec4 worldPosition			= modelMatrix * vec4(position,1.0);",
+    			"vec4 viewSpacePosition		= viewMatrix * worldPosition;",
 	
 				"vNormal 					= normalize( normalMatrix * normal );",
 				"vLightPositions[0]			= ( viewMatrix * vec4( uLightPositions[0], 1.0 ) ).xyz;",

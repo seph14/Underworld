@@ -155,6 +155,7 @@ function initScene() {
 			"Rock_A_01_Normal.png",
 			"PBR_Bump", 
 			"PBR_Color");
+	LoadRockParticle( 12, 153, 5, 8 )
 	
 	rock0 = CreateRock(0, 153, 20);
 	camera.lookAt( rock0.bound.center() );
