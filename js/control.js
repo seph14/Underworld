@@ -90,8 +90,8 @@ function initScene() {
 	renderer.gammaOutput = true;
 
 	//
-	camControl = new THREE.TrackballControls( camera, renderer.domElement );
-	camControl.target.set( 0, 120, 0 );
+	camControl = new THREE.OrbitControls( camera, renderer.domElement );
+	camControl.target.set( 0, 0, 0 );
 
 	camControl.rotateSpeed = 1.0;
 	camControl.zoomSpeed = 1.2;
@@ -106,7 +106,7 @@ function initScene() {
 	camControl.keys = [ 65, 83, 68 ];
 
 	//skybox
-	var path = "textures/skybox/";
+	var path = "textures/skydark/";
 	var format = '.jpg';
 	var urls = [
 				path + 'px' + format, path + 'nx' + format,
@@ -163,6 +163,9 @@ function initScene() {
 	if( debug ){
 		CreateRockGUI();
 	}
+
+	// BASE SCENE
+	CreateBase01();
 
 	//EVENTS
 	document.addEventListener( 'mousemove',  onDocumentMouseMove,  false );
