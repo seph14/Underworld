@@ -4,7 +4,8 @@ var rockMat;
 var coreMat;
 
 var rockConfig = {
-		uRoughness : 1.0,
+		distThreshold : 500
+		/*uRoughness : 1.0,
 		uMetallic  : 0.2,
 		uSpecular  : 0.1,
 		uDetails   : 1.0,
@@ -14,25 +15,30 @@ var rockConfig = {
 		uLightPositions : [ new THREE.Vector3( 0, 300, 0 ), new THREE.Vector3( 200, 0, 200 ) ],
 		uLightRadiuses0 : 5.0,
 		uLightRadiuses1 : 5.0,
-		uLightColors 	: [ new THREE.Vector3( 189, 137, 96 ), new THREE.Vector3( 201, 171, 114 ) ]
+		uLightColors 	: [ new THREE.Vector3( 189, 137, 96 ), new THREE.Vector3( 201, 171, 114 ) ]*/
 	};
 
 function RockAssemble () {
 	this.core  		= null; //core rock reference
 	this.crack 		= [];   //crack rock array
+	this.crackMesh	= [];   //crack rock mesh, for raycasting
 
     this.pos 		= new THREE.Vector3(0,0,0);
     this.bound 		= new THREE.Box3(new THREE.Vector3( -0.0, -0.0, -0.0 ), new THREE.Vector3( +0.0, +0.0, +0.0 ));
 }
 
 function RockCrack () {
+   	this.idx 		= 0;
     this.type 		= 0;    //0 - drop, 1 - orbit
-    this.mode 		= 0;	  //0 - attached, 1 - detached
+    this.mode 		= 0;	//0 - attached, 1 - detached
     this.mesh 		= null; //rock mesh
 
+    this.offset 	= new THREE.Vector3(0,0,0); //mesh offset to zero
     this.pos 		= new THREE.Vector3(0,0,0); //offset to its root position
-    this.axis 		= new THREE.Vector3(0,1,0); //rotation axis - default to y axis
-    this.vel  		= new THREE.Vector3(0,0,0); //rotation velocity
+    this.rotAxis 	= new THREE.Vector3(0,1,0); //rotation axis - default to y axis
+    this.rotSpeed  	= 0.0 						//rotation speed
+    this.revAxis 	= new THREE.Vector3(0,1,0); //revolution axis - default to y axis
+    this.velocity  	= new THREE.Vector3(0,0,0); //revolution velocity
     this.speed		= 0;						//current rotation speed
     this.maxSpeed 	= 0;						//maximum rotation speed
     //this.bound 		= new THREE.Box3(new THREE.Vector3( -0.0, -0.0, -0.0 ), new THREE.Vector3( +0.0, +0.0, +0.0 ));
@@ -40,17 +46,72 @@ function RockCrack () {
 
 function RockCore () {
 	this.mesh 		= null; //rock mesh
-	this.vel 		= new THREE.Vector3(0,0,0);
-    this.axis 		= new THREE.Vector3(0,1,0);
-    this.vel  		= new THREE.Vector3(0,0,0);
+	this.velocity 	= new THREE.Vector3(0,0,0);
+    this.rotAxis 	= new THREE.Vector3(0,1,0);
     this.speed		= 0;
     this.maxSpeed 	= 0;
 }
 
+RockAssemble.prototype.cast = function( raycaster ) {
+	//var intersects = raycaster.intersectObjects( this.crackMesh );
+	var intersects = raycaster.intersectObject( this.core.mesh );
+	trace( intersects.distance );
+	
+	if( intersects.length <= 0 ) return false;
+	
+	var pos  = intersects[0].point;//geometry.boundingBox.center();
+	trace( pos.x + "," + pos.y + "," + pos.z );
+	var dist = new THREE.Vector3;
+	var cnt  = 35;
+	
+	for( var i = (this.crack.length-1); i >= 0; i-- ){
+		if( this.crack[i].mode >= 1.0 ) continue;
+		dist.subVectors(this.crack[i].offset, pos);
+		var len = dist.lengthSq();
+		if( len < rockConfig.distThreshold ){
+			this.crack[i].mode = 1.0;
+			cnt --;
+			if(cnt < 0) break;
+		}
+	}
+
+	return true;
+};
+
+RockCrack.prototype.update = function( ) {
+	if( this.mode < 1 ) return;
+
+	//rotation
+	this.mesh.rotation.x += this.rotSpeed * this.rotAxis.x;
+	this.mesh.rotation.y += this.rotSpeed * this.rotAxis.y;
+	this.mesh.rotation.z += this.rotSpeed * this.rotAxis.z;
+
+	//revolution	
+	var prerad  = this.maxSpeed / this.speed / this.speed;
+	this.speed += ( this.maxSpeed - this.speed ) * 0.001;
+	var currad  = this.maxSpeed / this.speed / this.speed;
+
+	var ang     = Math.atan2( this.pos.z, this.pos.x );
+	var omega 	= this.speed / currad;
+	ang 		+= omega;
+
+	this.velocity.x = this.pos.x;
+	this.velocity.z = this.pos.z;
+
+	this.pos.x  = 10.0 * currad * Math.cos(ang);
+	this.pos.z  = 10.0 * currad * Math.sin(ang);
+
+	this.velocity.x = this.pos.x - this.velocity.x;
+	this.velocity.z = this.pos.z - this.velocity.z;
+	this.mesh.position.set( this.pos.x + this.offset.x, this.pos.y + this.offset.y, this.pos.z + this.offset.z );
+};
+
 //update position when dropping down or 
-//RockAssemble.prototype.update = function() {
-//
-//};
+RockAssemble.prototype.update = function() {
+	for( var i = this.crack.length-1; i >= 0; i-- ){
+		this.crack[i].update();
+	}
+};
 
 //RockAssemble.prototype.getInfo = function() {
 //};
@@ -118,67 +179,8 @@ function LoadMat( texDiffuse, texNormal, nameRock, nameMonolite ){
 					       shading: 		THREE.FlatShading };
 	coreMat = new THREE.ShaderMaterial( parametersmono );
 
-	/*var manager = new THREE.LoadingManager();
-	manager.onProgress = function ( item, loaded, total ) { };
-	var loader = new THREE.ImageLoader( manager );
-	
-	// texture
-	var texture = new THREE.Texture();
-	
-	loader.load( 'textures/' + texDiffuse, function ( image ) {
-		texture.image = image;
-		texture.wrapS = THREE.RepeatWrapping;
-		texture.wrapT = THREE.RepeatWrapping;
-		texture.repeat.set( 1, 1 );
-		texture.needsUpdate = true;
-	} );
-
-	rockMat = new THREE.MeshBasicMaterial();
-	rockMat.map = texture;*/
-
 	return rockMat;
 }
-
-/*function CreateRock( path, cnt, format, scale ){
-	var manager = new THREE.LoadingManager();
-	manager.onProgress = function ( item, loaded, total ) { };
-	
-	var rock = new RockAssemble();
-
-	var matrix = new THREE.Matrix4;
-	matrix.multiplyScalar(scale);
-
-	var onProgress = function ( xhr ) {
-		//if ( xhr.lengthComputable ) {
-			//var percentComplete = xhr.loaded / xhr.total * 100;
-			//trace( Math.round(percentComplete, 2) + '% downloaded' );
-		//}
-	};
-
-	var onError = function ( xhr ) { trace("file not found"); };
-
-	// model
-	var loader = new THREE.OBJLoader( manager );
-	for (var i = 2; i <= cnt; i++) {
-		var str = "models/" + path + i + format;
-		loader.load( str, function ( object ) {
-			object.traverse( function ( child ) {
-				if ( child instanceof THREE.Mesh ) {
-					child.material = rockMat;
-					child.applyMatrix(matrix);
-					var crack = new RockCrack();
-					child.geometry.computeBoundingBox ();
-					rock.bound.union(child.geometry.boundingBox);
-					crack.mesh = child;
-					rock.crack.push(crack);
-					scene.add(child);
-				}
-			} );
-		}, onProgress, onError );
-	};
-
-	return rock;
-}*/
 
 //TODO: need to compile OBJs into json files for fast loading
 function CreateRock( idx, cnt, scale ){
@@ -196,27 +198,33 @@ function CreateRock( idx, cnt, scale ){
 	// model
 	var loader = new THREE.OBJLoader( manager );
 
+	var cidx = 0;
 	var root = "models/RockHollow" + idx + "/Rock";
 	for (var i = 1; i <= cnt; i++) {
 		var str = root + i + ".obj";
 		loader.load( str, function ( object ) {
 			object.traverse( function ( child ) {
 				if ( child instanceof THREE.Mesh ) {
-					child.material = rockMat;
-				
-					child.applyMatrix(matrix);
-
-					if(Math.random() < 0.5){
-						child.position.x = Math.random() * 500 - 250;
-						child.position.y = Math.random() * 500 - 250;
-						child.position.z = Math.random() * 500 - 250;
-					}
-					
-					var crack = new RockCrack();
+					child.material = rockMat;				
+					child.geometry.applyMatrix(matrix);
 					child.geometry.computeBoundingBox ();
+					
+					var crack 	 	= new RockCrack();
+					crack.idx 		= cidx ++;
+					crack.offset 	= child.geometry.boundingBox.center();
+					
+					child.geometry.applyMatrix( new THREE.Matrix4().makeTranslation( - crack.offset.x, - crack.offset.y, - crack.offset.z ) );
+					child.position.set( crack.offset.x, crack.offset.y, crack.offset.z );
+					
+					crack.mesh 	 	= child;
+					crack.rotAxis.set( Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5 );
+					crack.rotAxis.normalize();
+					crack.rotSpeed  = 0.005 + 0.01 * Math.random();
+					crack.maxSpeed  = 0.035 + 0.11 * Math.random();
+					crack.speed 	= 2 * crack.maxSpeed;
+					
 					rock.bound.union(child.geometry.boundingBox);
-					crack.mesh = child;
-				
+					rock.crackMesh.push(child);
 					rock.crack.push(crack);
 					scene.add(child);
 				}
@@ -229,10 +237,13 @@ function CreateRock( idx, cnt, scale ){
 		object.traverse( function ( child ) {
 			if ( child instanceof THREE.Mesh ) {
 				child.material = coreMat;
-				child.applyMatrix(matrix);
+				child.geometry.applyMatrix(matrix);
+				//child.geometry.computeBoundingBox ();
+				//var center 	= child.geometry.boundingBox.center();
+				//child.geometry.applyMatrix( new THREE.Matrix4().makeTranslation( - center.x, - center.y, - center.z ) );
+				//child.position.set( center.x, center.y, center.z );
+				
 				var core = new RockCore();
-				child.geometry.computeBoundingBox ();
-				rock.bound.union(child.geometry.boundingBox);
 				core.mesh = child;
 				rock.core = core;
 				scene.add(child);
@@ -247,7 +258,11 @@ function CreateRockGUI(){
 
 	var gui = new dat.GUI();
 
-	gui.add( rockConfig, 'uRoughness', 0.0, 1.0 ).onChange( function() {
+	gui.add( rockConfig, 'distThreshold', 0.0, 500.0 ).onChange( function() {
+	});
+
+
+	/*gui.add( rockConfig, 'uRoughness', 0.0, 1.0 ).onChange( function() {
 		rockMat.uRoughness = rockConfig.uRoughness;
 	});
 

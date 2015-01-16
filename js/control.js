@@ -7,12 +7,15 @@ var SCREEN_WIDTH = WIDTH;
 var SCREEN_HEIGHT = HEIGHT - 2 * MARGIN;
 var FAR  = 10000;
 var NEAR = 1;
+var touchable;
 
 var container, stats;
 var camera, scene, renderer;
 var cameraCube, sceneCube, skyMesh;
 var ambientLight, sunLight;
 var camControl;
+
+var rock0;
 
 var composer, effectFXAA;
 
@@ -25,6 +28,7 @@ function initScene() {
 		return;
 	}
 
+	touchable = is_touch_device();
 	container = document.getElementById( 'viewport' );
 			
 	if(debug){
@@ -125,10 +129,6 @@ function initScene() {
 	skyMesh = new THREE.Mesh( new THREE.BoxGeometry( FAR, FAR, FAR ), material );
 	sceneCube.add( skyMesh );		
 
-	// EVENTS
-	window.addEventListener  ( 'resize',  onWindowResize, false );
-	document.addEventListener( 'keydown', onKeyDown,      false );
-
 	// COMPOSER
 
 	var renderTargetParameters = { minFilter: 		THREE.LinearFilter, 
@@ -156,12 +156,20 @@ function initScene() {
 			"PBR_Bump", 
 			"PBR_Color");
 	
-	var rock = CreateRock(0, 153, 20);
-	camera.lookAt( rock.bound.center() );
+	rock0 = CreateRock(0, 153, 20);
+	camera.lookAt( rock0.bound.center() );
 
-	//if( debug ){
-	//	CreateRockGUI();
-	//}
+	if( debug ){
+		CreateRockGUI();
+	}
+
+	//EVENTS
+	document.addEventListener( 'mousemove',  onDocumentMouseMove,  false );
+	container.addEventListener( touchable ? 'touchstart' : 'click', 	 
+											 onDocumentMouseDown,  false );
+	window.addEventListener  ( 'resize',     onWindowResize,       false );
+	window.addEventListener  ( 'keydown',    onKeyDown,            false ); 
+
 
 	animate();
 }
@@ -187,8 +195,22 @@ function onKeyDown( event ){
 
 }
 
-function onDocumentMouseClick( event ){
-
+function onDocumentMouseDown( event ){
+	//event.preventDefault();
+	
+	var mousex, mousey;
+	if(touchable){
+		var touchobj = event.changedTouches[0];
+		mousex = ( touchobj.clientX / window.innerWidth ) * 2 - 1;
+		mousey = - ( touchobj.clientY / window.innerHeight ) * 2 + 1;
+	}else{
+		mousex = ( event.clientX / window.innerWidth ) * 2 - 1;
+		mousey = - ( event.clientY / window.innerHeight ) * 2 + 1;
+	}
+		
+	var vector 		= new THREE.Vector3( mousex, mousey, 0.5 ).unproject( camera );
+	var raycaster 	= new THREE.Raycaster( camera.position, vector.sub( camera.position ).normalize() );
+	rock0.cast( raycaster );
 }
 
 function onDocumentMouseMove( event ) {	
@@ -205,9 +227,8 @@ function render() {
 	// update
 	camControl.update();
 	cameraCube.rotation.copy( camera.rotation );
-	skyMesh.position.x = camera.position.x;
-	skyMesh.position.y = camera.position.y;
-	skyMesh.position.z = camera.position.z;
+
+	rock0.update();
 	// render scene
 
 	//renderer.render( scene, camera );
