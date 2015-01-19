@@ -32,13 +32,12 @@ function RockAssemble () {
 
 function RockParticle () {
 	this.mesh 		= null;
-	this.isdead 	= false;
+	this.count 		= 600;
 	this.droprate 	= 0.008 + 0.012 * Math.random();
 	this.velocity	= new THREE.Vector3(0,0,0);
 	this.position 	= new THREE.Vector3(0,0,0);
 	var m 			= 0.2 + 0.4 * Math.random();
 	this.mass 		= new THREE.Vector3( 0, - 15.0/m, 0 ); 
-	//console.log( this.droprate + "," + m );
 }
 
 function RockCrack () {
@@ -73,7 +72,7 @@ RockAssemble.prototype.update = function() {
 	}
 	var cnt = this.crackParticle.length;
 	for( var i = 0; i < this.crackParticle.length; ){
-		if( this.crackParticle[i].isdead ){
+		if( this.crackParticle[i].count < 0 ){
 			scene.remove( this.crackParticle[i].mesh );
 			this.crackParticle.remove(i);
 		}else{
@@ -87,7 +86,7 @@ RockAssemble.prototype.update = function() {
 };
 
 RockAssemble.prototype.dropParticle = function( point ){
-	var cnt 	= Math.floor(10 + 30 * Math.random()); 
+	var cnt 	= Math.floor(50 + 50 * Math.random()); 
 	var offset 	= new THREE.Vector3();
 	
 	offset.subVectors(point, this.pos);
@@ -104,11 +103,6 @@ RockAssemble.prototype.dropParticle = function( point ){
 		
 		scene.add(particle.mesh);
 		this.crackParticle.push(particle);
-
-		//not working ??
-		setTimeout( 1500, function( particle){
-			particle.countdown();
-		});	
 	}
 }
 
@@ -199,10 +193,6 @@ RockCore.prototype.update = function() {
 	this.mesh.rotation.z += this.speed * this.rotAxis.z;
 };
 
-RockParticle.prototype.countdown = function(){
-	this.isdead = true;
-}
-
 RockParticle.prototype.update = function() {
 	var tmp = new THREE.Vector3;
 	tmp.subVectors(this.mass, this.velocity).multiplyScalar(this.droprate);
@@ -214,6 +204,7 @@ RockParticle.prototype.update = function() {
 	this.mesh.position.x = this.position.x;
 	this.mesh.position.y = this.position.y;
 	this.mesh.position.z = this.position.z;
+	this.count --;
 }
 
 function LoadMat( texDiffuse, texNormal, nameRock, nameMonolite ){

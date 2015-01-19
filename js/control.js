@@ -42,7 +42,7 @@ function initScene() {
 	// SCENE
 	scene = new THREE.Scene();
 	sceneCube = new THREE.Scene();
-	scene.fog = new THREE.Fog( 0xcdcdcd, 1000, FAR );
+	scene.fog = new THREE.Fog( 0xcdcdcd, 500, FAR );
 
 	// CAMERA
 	camera = new THREE.PerspectiveCamera( 45, SCREEN_WIDTH / SCREEN_HEIGHT, NEAR, FAR );
@@ -162,9 +162,9 @@ function initScene() {
 			"Rock_A_01_Normal.png",
 			"PBR_Bump", 
 			"PBR_Color");
-	LoadRockParticle( 12, 153, 2, 4 )
+	LoadRockParticle( 12, 153, 1, 3 )
 	
-	rock0 = CreateRock(0, 153, 20);
+	rock0 = CreateRock(0, 153, 10);
 	camera.lookAt( rock0.bound.center() );
 
 	if( debug ){
