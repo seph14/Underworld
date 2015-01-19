@@ -22,12 +22,13 @@ THREE.ShaderPBR = {
 		uniforms: THREE.UniformsUtils.merge( [
 
 			THREE.UniformsLib[ "fog" ],
+			THREE.UniformsLib[ "lights" ],
 			THREE.UniformsLib[ "shadowmap" ],
 
 			{
-				"uLightPositions": {type: "v3v", value: [new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, 0 )]},
-				"uLightColors" 	 : {type: "v3v", value: [new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, 0 )]},
-				"uLightRadiuses" : {type: "fv1", value: [ 30.0, 30.0 ] },    // float array (plain)
+			//	"uLightPositions": {type: "v3v", value: [new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, 0 )]},
+			//	"uLightColors" 	 : {type: "v3v", value: [new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, 0 )]},
+			//	"uLightRadiuses" : {type: "fv1", value: [ 30.0, 30.0 ] },    // float array (plain)
 
 				"uBaseColor" 	 : {type: "c",  value: new THREE.Color( 0xffffff )},
 				"uRoughness" 	 : {type: "f",  value: 0},
@@ -66,9 +67,33 @@ THREE.ShaderPBR = {
 			//"uniform sampler2D	uRoughnessMap;",
 
 			"varying vec3 vNormal;",
-			"varying vec3 vLightPositions[2];",
 			"varying vec3 vPosition;",
 			"varying vec2 vTexCoord;",
+			
+			"uniform vec3 ambientLightColor;",
+
+			"#if MAX_DIR_LIGHTS > 0",
+
+				"uniform vec3 directionalLightColor[ MAX_DIR_LIGHTS ];",
+				"uniform vec3 directionalLightDirection[ MAX_DIR_LIGHTS ];",
+
+			"#endif",
+
+			"#if MAX_HEMI_LIGHTS > 0",
+
+				"uniform vec3 hemisphereLightSkyColor[ MAX_HEMI_LIGHTS ];",
+				"uniform vec3 hemisphereLightGroundColor[ MAX_HEMI_LIGHTS ];",
+				"uniform vec3 hemisphereLightDirection[ MAX_HEMI_LIGHTS ];",
+
+			"#endif",
+
+			"#if MAX_POINT_LIGHTS > 0",
+
+				"uniform vec3 pointLightColor[ MAX_POINT_LIGHTS ];",
+				"uniform vec3 pointLightPosition[ MAX_POINT_LIGHTS ];",
+				"uniform float pointLightDistance[ MAX_POINT_LIGHTS ];",
+
+			"#endif",
 
 			THREE.ShaderChunk[ "shadowmap_pars_fragment" ],
 			THREE.ShaderChunk[ "fog_pars_fragment" ],
@@ -196,34 +221,90 @@ THREE.ShaderPBR = {
 				// deduce the specular color from the baseColor and how metallic the material is
 				"vec3 specularColor	= mix( vec3( 0.08 * uSpecular ), baseColor, metallic );",
 	
-				"for( int i = 0; i < 2; i++ ){",
+				"#if MAX_POINT_LIGHTS > 0",
+					"for( int i = 0; i < MAX_POINT_LIGHTS; i++ ){",
 		
-					"vec3 L = normalize( vLightPositions[i] - vPosition );",
-					"vec3 H	= normalize(V + L);",
+						"vec4 lPosition = viewMatrix * vec4( pointLightPosition[ i ], 1.0 );",
+						"vec3 L 		= normalize( lPosition - vPosition );",
+						"vec3 H			= normalize(V + L);",
+					
+						// get all the usefull dot products and clamp them between 0 and 1 just to be safe
+						"float NoL	= saturate( dot( N, L ) );",
+						"float NoV	= saturate( dot( N, V ) );",
+						"float VoH	= saturate( dot( V, H ) );",
+						"float NoH	= saturate( dot( N, H ) );",
 		
-					// get all the usefull dot products and clamp them between 0 and 1 just to be safe
-					"float NoL	= saturate( dot( N, L ) );",
-					"float NoV	= saturate( dot( N, V ) );",
-					"float VoH	= saturate( dot( V, H ) );",
-					"float NoH	= saturate( dot( N, H ) );",
+						// compute the brdf terms
+						"float distribution	= getNormalDistribution( roughness, NoH );",
+						"vec3 fresnel		= getFresnel( specularColor, VoH );",
+						"float geom			= getGeometricShadowing( roughness, NoV, NoL, VoH, L, V );",
 		
-					// compute the brdf terms
-					"float distribution	= getNormalDistribution( roughness, NoH );",
-					"vec3 fresnel		= getFresnel( specularColor, VoH );",
-					"float geom			= getGeometricShadowing( roughness, NoV, NoL, VoH, L, V );",
+						// get the specular and diffuse and combine them
+						"vec3 diffuse			= getDiffuse( diffuseColor, roughness, NoV, NoL, VoH );",
+						"vec3 specular			= NoL * ( distribution * fresnel * geom );",
+						"vec3 directLighting	= pointLightColor[i] * ( diffuse + specular );",
 		
-					// get the specular and diffuse and combine them
-					"vec3 diffuse			= getDiffuse( diffuseColor, roughness, NoV, NoL, VoH );",
-					"vec3 specular			= NoL * ( distribution * fresnel * geom );",
-					"vec3 directLighting	= uLightColors[i] * ( diffuse + specular );",
+						// get the light attenuation from its radius
+						"float attenuation	= getAttenuation( lPosition, vPosition, pointLightDistance[i] );",
+						"color				+= attenuation * directLighting;",
 		
-					// get the light attenuation from its radius
-					"float attenuation	= getAttenuation( vLightPositions[i], vPosition, uLightRadiuses[i] );",
-					"color				+= attenuation * directLighting;",
+						// add in-scattering coeff
+						"color				+= saturate( pow( getScattering( -V, lPosition, -vPosition.z ), 1.35 ) * pointLightColor[i] * pointLightDistance[i] * 0.002 );",
+					"}",
+				"#endif",
+
+				// directional lights
+				"#if MAX_DIR_LIGHTS > 0",
+					"for( int i = 0; i < MAX_DIR_LIGHTS; i++ ) {",
+
+						"vec4 lDirection 	= viewMatrix * vec4( directionalLightDirection[ i ], 0.0 );",
+						"vec3 L 			= normalize( lDirection.xyz );",
+						"vec3 H				= normalize(V + L);",
+					
+						// get all the usefull dot products and clamp them between 0 and 1 just to be safe
+						"float NoL	= saturate( dot( N, L ) );",
+						"float NoV	= saturate( dot( N, V ) );",
+						"float VoH	= saturate( dot( V, H ) );",
+						"float NoH	= saturate( dot( N, H ) );",
+						"float wei  = (NoL * 0.5 + 0.5);",
 		
-					// add in-scattering coeff
-					"color				+= saturate( pow( getScattering( -V, vLightPositions[i], -vPosition.z ), 1.35 ) * uLightColors[i] * uLightRadiuses[i] * 0.002 );",
-				"}",
+						// compute the brdf terms
+						"float distribution		= getNormalDistribution( roughness, NoH );",
+						"vec3 fresnel			= getFresnel( specularColor, VoH );",
+						"float geom				= getGeometricShadowing( roughness, NoV, NoL, VoH, L, V );",
+		
+						// get the specular and diffuse and combine them
+						"vec3 diffuse			= getDiffuse( diffuseColor, roughness, NoV, NoL, VoH );",
+						"vec3 specular			= NoL * ( distribution * fresnel * geom );",
+						"vec3 directLighting	= directionalLightColor[i] * ( diffuse + specular );",
+		
+						// get the light strongness
+						"color					+= wei * directLighting;",
+					"}",
+				"#endif",
+
+				// hemisphere lights
+				"#if MAX_HEMI_LIGHTS > 0",
+					"for ( int i = 0; i < MAX_HEMI_LIGHTS; i ++ ) {",
+
+						"vec4 lDirection 	= viewMatrix * vec4( hemisphereLightDirection[ i ], 0.0 );",
+						"vec3 L 			= normalize( lDirection.xyz );",
+						"vec3 H				= normalize(V + L);",
+					
+						// get all the usefull dot products and clamp them between 0 and 1 just to be safe
+						"float NoL	= saturate( dot( N, L ) );",
+						"float NoV	= saturate( dot( N, V ) );",
+						"float VoH	= saturate( dot( V, H ) );",
+						"float NoH	= saturate( dot( N, H ) );",
+						"float wei  = (NoL * 0.5 + 0.5);",
+
+						// get the specular and diffuse and combine them
+						"vec3 diffuse			= getDiffuse( diffuseColor, roughness, NoV, NoL, VoH );",
+						"vec3 specular			= NoL * ( distribution * fresnel * geom );",
+						
+						"color += (diffuse + specular) * mix( hemisphereLightGroundColor[ i ], hemisphereLightSkyColor[ i ], hemiDiffuseWeight );",
+					"}",
+				"#endif",
 	
 				// apply the tone-mapping
 				"color					= Uncharted2Tonemap( color * uExposure );",
@@ -250,7 +331,6 @@ THREE.ShaderPBR = {
 			"uniform vec3   uLightPositions[2];",
 
 			"varying vec3	vNormal;",
-			"varying vec3	vLightPositions[2];",
 			"varying vec3	vPosition;",
 			"varying vec2	vTexCoord;",
 			
@@ -261,9 +341,7 @@ THREE.ShaderPBR = {
     			"vec4 viewSpacePosition		= viewMatrix * worldPosition;",
 	
 				"vNormal 					= normalize( normalMatrix * normal );",
-				"vLightPositions[0]			= ( viewMatrix * vec4( uLightPositions[0], 1.0 ) ).xyz;",
-				"vLightPositions[1]			= ( viewMatrix * vec4( uLightPositions[1], 1.0 ) ).xyz;",
-    			"vPosition					= viewSpacePosition.xyz;",
+				"vPosition					= viewSpacePosition.xyz;",
 				"vTexCoord					= uv;",
 	
     			"gl_Position				= projectionMatrix * viewSpacePosition;",
@@ -288,12 +366,13 @@ THREE.ShaderPBR = {
 		uniforms: THREE.UniformsUtils.merge( [
 
 			THREE.UniformsLib[ "fog" ],
+			THREE.UniformsLib[ "lights" ],
 			THREE.UniformsLib[ "shadowmap" ],
 
 			{
-				"uLightPositions": {type: "v3v", value: [new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, 0 )]},
-				"uLightColors" 	 : {type: "v3v", value: [new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, 0 )]},
-				"uLightRadiuses" : {type: "fv1", value: [ 30.0, 30.0 ] },    // float array (plain)
+				//"uLightPositions": {type: "v3v", value: [new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, 0 )]},
+				//"uLightColors" 	 : {type: "v3v", value: [new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, 0 )]},
+				//"uLightRadiuses" : {type: "fv1", value: [ 30.0, 30.0 ] },    // float array (plain)
 
 				"uBaseColor" 	 : {type: "c",  value: new THREE.Color( 0xffffff )},
 				"uRoughness" 	 : {type: "f",  value: 0},
@@ -310,9 +389,6 @@ THREE.ShaderPBR = {
 
 			"#extension GL_OES_standard_derivatives : enable",
 			
-			"uniform vec3   uLightColors[ 2 ];",
-			"uniform float  uLightRadiuses[ 2 ];",
-
 			"uniform vec3	uBaseColor;",
 			"uniform float	uRoughness;",
 			"uniform float	uMetallic;",
@@ -322,9 +398,33 @@ THREE.ShaderPBR = {
 			"uniform float	uGamma;",
 
 			"varying vec3 vNormal;",
-			"varying vec3 vLightPositions[2];",
 			"varying vec3 vPosition;",
 			
+			"uniform vec3 ambientLightColor;",
+
+			"#if MAX_DIR_LIGHTS > 0",
+
+				"uniform vec3 directionalLightColor[ MAX_DIR_LIGHTS ];",
+				"uniform vec3 directionalLightDirection[ MAX_DIR_LIGHTS ];",
+
+			"#endif",
+
+			"#if MAX_HEMI_LIGHTS > 0",
+
+				"uniform vec3 hemisphereLightSkyColor[ MAX_HEMI_LIGHTS ];",
+				"uniform vec3 hemisphereLightGroundColor[ MAX_HEMI_LIGHTS ];",
+				"uniform vec3 hemisphereLightDirection[ MAX_HEMI_LIGHTS ];",
+
+			"#endif",
+
+			"#if MAX_POINT_LIGHTS > 0",
+
+				"uniform vec3 pointLightColor[ MAX_POINT_LIGHTS ];",
+				"uniform vec3 pointLightPosition[ MAX_POINT_LIGHTS ];",
+				"uniform float pointLightDistance[ MAX_POINT_LIGHTS ];",
+
+			"#endif",
+
 			THREE.ShaderChunk[ "shadowmap_pars_fragment" ],
 			THREE.ShaderChunk[ "fog_pars_fragment" ],
 			
@@ -428,32 +528,90 @@ THREE.ShaderPBR = {
 				// deduce the specular color from the baseColor and how metallic the material is
 				"vec3 specularColor	= mix( vec3( 0.08 * uSpecular ), uBaseColor, uMetallic );",
 	
-				"for( int i = 0; i < 2; i++ ){",
+				"#if MAX_POINT_LIGHTS > 0",
+					"for( int i = 0; i < MAX_POINT_LIGHTS; i++ ){",
 		
-					"vec3 L = normalize( vLightPositions[i] - vPosition );",
-					"vec3 H	= normalize(V + L);",
+						"vec4 lPosition = viewMatrix * vec4( pointLightPosition[ i ], 1.0 );",
+						"vec3 L 		= normalize( lPosition - vPosition );",
+						"vec3 H			= normalize(V + L);",
+					
+						// get all the usefull dot products and clamp them between 0 and 1 just to be safe
+						"float NoL	= saturate( dot( N, L ) );",
+						"float NoV	= saturate( dot( N, V ) );",
+						"float VoH	= saturate( dot( V, H ) );",
+						"float NoH	= saturate( dot( N, H ) );",
 		
-					// get all the usefull dot products and clamp them between 0 and 1 just to be safe
-					"float NoL	= saturate( dot( N, L ) );",
-					"float NoV	= saturate( dot( N, V ) );",
-					"float VoH	= saturate( dot( V, H ) );",
-					"float NoH	= saturate( dot( N, H ) );",
+						// compute the brdf terms
+						"float distribution	= getNormalDistribution( uRoughness, NoH );",
+						"vec3 fresnel		= getFresnel( specularColor, VoH );",
+						"float geom			= getGeometricShadowing( uRoughness, NoV, NoL, VoH, L, V );",
 		
-					// compute the brdf terms
-					"float distribution	= getNormalDistribution( uRoughness, NoH );",
-					"vec3 fresnel		= getFresnel( specularColor, VoH );",
-					"float geom			= getGeometricShadowing( uRoughness, NoV, NoL, VoH, L, V );",
+						// get the specular and diffuse and combine them
+						"vec3 diffuse			= getDiffuse( diffuseColor, uRoughness, NoV, NoL, VoH );",
+						"vec3 specular			= NoL * ( distribution * fresnel * geom );",
+						"vec3 directLighting	= pointLightColor[i] * ( diffuse + specular );",
 		
-					// get the specular and diffuse and combine them
-					"vec3 diffuse			= getDiffuse( diffuseColor, uRoughness, NoV, NoL, VoH );",
-					"vec3 specular			= NoL * ( distribution * fresnel * geom );",
-					"vec3 directLighting	= uLightColors[i] * ( diffuse + specular );",
+						// get the light attenuation from its radius
+						"float attenuation	= getAttenuation( lPosition, vPosition, pointLightDistance[i] );",
+						"color				+= attenuation * directLighting;",
 		
-					// get the light attenuation from its radius
-					"float attenuation	= getAttenuation( vLightPositions[i], vPosition, uLightRadiuses[i] );",
-					"color				+= attenuation * directLighting;",
+						// add in-scattering coeff
+						"color				+= saturate( pow( getScattering( -V, lPosition, -vPosition.z ), 1.35 ) * pointLightColor[i] * pointLightDistance[i] * 0.002 );",
+					"}",
+				"#endif",
+
+				// directional lights
+				"#if MAX_DIR_LIGHTS > 0",
+					"for( int i = 0; i < MAX_DIR_LIGHTS; i++ ) {",
+
+						"vec4 lDirection 	= viewMatrix * vec4( directionalLightDirection[ i ], 0.0 );",
+						"vec3 L 			= normalize( lDirection.xyz );",
+						"vec3 H				= normalize(V + L);",
+					
+						// get all the usefull dot products and clamp them between 0 and 1 just to be safe
+						"float NoL	= saturate( dot( N, L ) );",
+						"float NoV	= saturate( dot( N, V ) );",
+						"float VoH	= saturate( dot( V, H ) );",
+						"float NoH	= saturate( dot( N, H ) );",
+						"float wei  = (NoL * 0.5 + 0.5);",
 		
-				"}",
+						// compute the brdf terms
+						"float distribution		= getNormalDistribution( uRoughness, NoH );",
+						"vec3 fresnel			= getFresnel( specularColor, VoH );",
+						"float geom				= getGeometricShadowing( uRoughness, NoV, NoL, VoH, L, V );",
+		
+						// get the specular and diffuse and combine them
+						"vec3 diffuse			= getDiffuse( diffuseColor, uRoughness, NoV, NoL, VoH );",
+						"vec3 specular			= NoL * ( distribution * fresnel * geom );",
+						"vec3 directLighting	= directionalLightColor[i] * ( diffuse + specular );",
+		
+						// get the light strongness
+						"color					+= wei * directLighting;",
+					"}",
+				"#endif",
+
+				// hemisphere lights
+				"#if MAX_HEMI_LIGHTS > 0",
+					"for ( int i = 0; i < MAX_HEMI_LIGHTS; i ++ ) {",
+
+						"vec4 lDirection 	= viewMatrix * vec4( hemisphereLightDirection[ i ], 0.0 );",
+						"vec3 L 			= normalize( lDirection.xyz );",
+						"vec3 H				= normalize(V + L);",
+					
+						// get all the usefull dot products and clamp them between 0 and 1 just to be safe
+						"float NoL	= saturate( dot( N, L ) );",
+						"float NoV	= saturate( dot( N, V ) );",
+						"float VoH	= saturate( dot( V, H ) );",
+						"float NoH	= saturate( dot( N, H ) );",
+						"float wei  = (NoL * 0.5 + 0.5);",
+
+						// get the specular and diffuse and combine them
+						"vec3 diffuse			= getDiffuse( diffuseColor, uRoughness, NoV, NoL, VoH );",
+						"vec3 specular			= NoL * ( distribution * fresnel * geom );",
+						
+						"color += (diffuse + specular) * mix( hemisphereLightGroundColor[ i ], hemisphereLightSkyColor[ i ], hemiDiffuseWeight );",
+					"}",
+				"#endif",
 	
 				// apply the tone-mapping
 				"color					= Uncharted2Tonemap( color * uExposure );",
@@ -477,10 +635,7 @@ THREE.ShaderPBR = {
 
 		vertexShader: [
 
-			"uniform vec3   uLightPositions[2];",
-
 			"varying vec3	vNormal;",
-			"varying vec3	vLightPositions[2];",
 			"varying vec3	vPosition;",
 			
 			THREE.ShaderChunk[ "shadowmap_pars_vertex" ],
@@ -491,9 +646,7 @@ THREE.ShaderPBR = {
     			"vec4 viewSpacePosition		= viewMatrix * worldPosition;",
 	
 				"vNormal 					= normalize( normalMatrix * normal );",
-				"vLightPositions[0]			= ( viewMatrix * vec4( uLightPositions[0], 1.0 ) ).xyz;",
-				"vLightPositions[1]			= ( viewMatrix * vec4( uLightPositions[1], 1.0 ) ).xyz;",
-    			"vPosition					= viewSpacePosition.xyz;",
+				"vPosition					= viewSpacePosition.xyz;",
 				
     			"gl_Position				= projectionMatrix * viewSpacePosition;",
 

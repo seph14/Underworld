@@ -20276,7 +20276,6 @@ THREE.WebGLRenderer = function ( parameters ) {
 					_gl.vertexAttribPointer( programAttribute, size, _gl.FLOAT, false, 0, startIndex * size * 4 ); // 4 bytes per Float32
 
 				} else if ( material.defaultAttributeValues !== undefined ) {
-
 					if ( material.defaultAttributeValues[ key ].length === 2 ) {
 
 						_gl.vertexAttrib2fv( programAttribute, material.defaultAttributeValues[ key ] );

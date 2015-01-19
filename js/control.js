@@ -12,7 +12,7 @@ var touchable;
 var container, stats;
 var camera, scene, renderer;
 var cameraCube, sceneCube, skyMesh;
-var ambientLight, sunLight;
+var ambientLight, sunLight, directionalLight;
 var camControl;
 
 var rock0;
@@ -51,28 +51,35 @@ function initScene() {
 
 	cameraCube = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 100000 );
 	
-	var sunIntensity = 0.5;
-
 	ambientLight = new THREE.AmbientLight( 0x3f2806 );
 	scene.add( ambientLight );
 
-	sunLight = new THREE.SpotLight( 0xbf9c68, sunIntensity, 0, Math.PI/2, 1 );
-	sunLight.position.set( 1000, 2000, 1000 );
-
-	sunLight.castShadow = true;
-
-	sunLight.shadowDarkness = 0.3 * sunIntensity;
-	sunLight.shadowBias = -0.0002;
-
-	sunLight.shadowCameraNear = 750;
-	sunLight.shadowCameraFar = 4000;
-	sunLight.shadowCameraFov = 30;
-
+	sunLight = new THREE.SpotLight( 0xcad1dd, 1.0, 0, Math.PI / 2, 1 );
+	sunLight.position.set( 1000, 100, 1000 );
+	sunLight.rotation.set(  1.2, 0, 0 );
+	sunLight.castShadow 	  = true;
+	sunLight.shadowDarkness   = 0.3;
+	sunLight.shadowBias 	  = -0.002;
+	sunLight.shadowCameraNear = 100;
+	sunLight.shadowCameraFar  = 2000;
+	sunLight.shadowCameraFov  = 20;
+	sunLight.shadowMapWidth	  = 512;
+	sunLight.shadowMapHeight  = 512;
 	sunLight.shadowCameraVisible = false;
 	scene.add( sunLight );
 
+	var direct1 = new THREE.DirectionalLight( 0xcad1dd, 1.0 );
+	direct1.position.set( 1000, 100, 1000 );
+	direct1.rotation.set(  1.2, 0, 0 );
+	scene.add( direct1 );
+	
+	directionalLight = new THREE.DirectionalLight( 0xcfdff9, 1.0 );
+	directionalLight.position.set( -100, 200, -100 );
+	directionalLight.rotation.set( 0.8, 0.1, 0.8 );
+	scene.add( directionalLight );
+
 	// RENDERER
-	renderer = new THREE.WebGLRenderer( { antialias: false } );
+	renderer = new THREE.WebGLRenderer( { antialias: false, precision: "mediump" } );
 	//renderer.setClearColor( scene.fog.color, 1 );
 	renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
 
@@ -155,7 +162,7 @@ function initScene() {
 			"Rock_A_01_Normal.png",
 			"PBR_Bump", 
 			"PBR_Color");
-	LoadRockParticle( 12, 153, 5, 8 )
+	LoadRockParticle( 12, 153, 2, 4 )
 	
 	rock0 = CreateRock(0, 153, 20);
 	camera.lookAt( rock0.bound.center() );
@@ -165,7 +172,7 @@ function initScene() {
 	}
 
 	// BASE SCENE
-	CreateBase01();
+	CreateBase01( );
 
 	//EVENTS
 	document.addEventListener( 'mousemove',  onDocumentMouseMove,  false );
@@ -192,7 +199,7 @@ function onWindowResize() {
 	composer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
 
 	effectFXAA.uniforms[ 'resolution' ].value.set( 1 / SCREEN_WIDTH, 1 / SCREEN_HEIGHT );
-	camControl.handleResize();
+	//camControl.handleResize();
 }
 
 function onKeyDown( event ){
