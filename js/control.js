@@ -15,7 +15,7 @@ var cameraCube, sceneCube, skyMesh;
 var ambientLight, sunLight, directionalLight;
 var camControl;
 
-var rock0;
+var rocks = [];
 
 var composer, effectFXAA;
 
@@ -42,12 +42,12 @@ function initScene() {
 	// SCENE
 	scene = new THREE.Scene();
 	sceneCube = new THREE.Scene();
-	scene.fog = new THREE.Fog( 0xcdcdcd, 500, FAR );
+	scene.fog = new THREE.Fog( 0xcdcdcd, 100, FAR );
 
 	// CAMERA
-	camera = new THREE.PerspectiveCamera( 45, SCREEN_WIDTH / SCREEN_HEIGHT, NEAR, FAR );
-	camera.position.set( 80, -130, 80 );
-	camera.lookAt( scene.position );
+	camera = new THREE.PerspectiveCamera( 60, SCREEN_WIDTH / SCREEN_HEIGHT, NEAR, FAR );
+	camera.position.set( -154.4030650483917, -78.94138544243742, -51.83980437693978 );
+	camera.rotation.set( 2.509096643512917,  -1.1437036559358629, 2.707562454136679 );
 
 	cameraCube = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 100000 );
 	
@@ -157,22 +157,59 @@ function initScene() {
 	composer.addPass( renderSky   );
 	composer.addPass( renderModel );
 	composer.addPass( effectFXAA );
-
-	LoadMat("Rock_A_01_Diffuse.png",
-			"Rock_A_01_Normal.png",
-			"PBR_Bump", 
-			"PBR_Color");
-	LoadRockParticle( 12, 153, 1, 3 )
 	
-	rock0 = CreateRock(0, 153, 10);
-	camera.lookAt( rock0.bound.center() );
-
+	//camera.position.set( -154.4030650483917, -78.94138544243742, -51.83980437693978 );
+	
 	if( debug ){
 		CreateRockGUI();
 	}
 
 	// BASE SCENE
-	CreateBase01( );
+	//CreateBase01( );
+	LoadMat("Rock_A_01_Diffuse.png",
+			"Rock_A_01_Normal.png",
+			"PBR_Bump", 
+			"PBR_Color");
+	LoadRockParticle( 12, 153, 0.3, 0.6 );
+	LoadTerrainMat();
+	LoadTerrain();
+	LoadDummy();
+
+	rocks.push(CreateRock(0, 153, 3, 
+		new THREE.Vector3(-138,-63,-44)));
+	rocks.push(CreateRock(0, 153, 3, 
+		new THREE.Vector3(-101,-63,-44)));
+	rocks.push(CreateRock(0, 153, 3, 
+		new THREE.Vector3(-64, -63,-44)));
+	rocks.push(CreateRock(0, 153, 3, 
+		new THREE.Vector3(-27, -63,-44)));
+
+	rocks.push(CreateRock(0, 153, 3, 
+		new THREE.Vector3(-138,-63,-7)));
+	rocks.push(CreateRock(0, 153, 3, 
+		new THREE.Vector3(-101,-63,-7)));
+	rocks.push(CreateRock(0, 153, 3, 
+		new THREE.Vector3(-64, -63,-7)));
+	rocks.push(CreateRock(0, 153, 3, 
+		new THREE.Vector3(-27, -63,-7)));
+
+	rocks.push(CreateRock(0, 153, 3, 
+		new THREE.Vector3(-138,-63,+30)));
+	rocks.push(CreateRock(0, 153, 3, 
+		new THREE.Vector3(-101,-63,+30)));
+	rocks.push(CreateRock(0, 153, 3, 
+		new THREE.Vector3(-64, -63,+30)));
+	rocks.push(CreateRock(0, 153, 3, 
+		new THREE.Vector3(-27, -63,+30)));
+
+	rocks.push(CreateRock(0, 153, 3, 
+		new THREE.Vector3(-138,-63,+67)));
+	rocks.push(CreateRock(0, 153, 3, 
+		new THREE.Vector3(-101,-63,+67)));
+	rocks.push(CreateRock(0, 153, 3, 
+		new THREE.Vector3(-64, -63,+67)));
+	rocks.push(CreateRock(0, 153, 3, 
+		new THREE.Vector3(-27, -63,+67)));
 
 	//EVENTS
 	document.addEventListener( 'mousemove',  onDocumentMouseMove,  false );
@@ -203,7 +240,6 @@ function onWindowResize() {
 }
 
 function onKeyDown( event ){
-
 }
 
 function onDocumentMouseDown( event ){
@@ -221,7 +257,9 @@ function onDocumentMouseDown( event ){
 		
 	var vector 		= new THREE.Vector3( mousex, mousey, 0.5 ).unproject( camera );
 	var raycaster 	= new THREE.Raycaster( camera.position, vector.sub( camera.position ).normalize() );
-	rock0.cast( raycaster );
+	for( var i  = rocks.length-1; i >= 0; i-- ){
+		if( rocks[i].cast( raycaster ) ) break;
+	}
 }
 
 function onDocumentMouseMove( event ) {	
@@ -239,7 +277,9 @@ function render() {
 	camControl.update();
 	cameraCube.rotation.copy( camera.rotation );
 
-	rock0.update();
+	for( var i  = rocks.length-1; i >= 0; i-- ){
+		rocks[i].update();
+	}
 	// render scene
 
 	//renderer.render( scene, camera );

@@ -68,7 +68,7 @@ function RockCore () {
 //update position when dropping down or 
 RockAssemble.prototype.update = function() {
 	for( var i = this.crack.length-1; i >= 0; i-- ){
-		this.crack[i].update();
+		this.crack[i].update( this.pos );
 	}
 	var cnt = this.crackParticle.length;
 	for( var i = 0; i < this.crackParticle.length; ){
@@ -81,7 +81,7 @@ RockAssemble.prototype.update = function() {
 		}
 	}
 	if( this.breakPer > 1.0 ){
-		this.core.update();
+		this.core.update( this.pos );
 	}
 };
 
@@ -126,7 +126,8 @@ RockAssemble.prototype.cast = function( raycaster ) {
 
 	for( var i = (this.crack.length-1); i >= 0; i-- ){
 		if( this.crack[i].mode >= 1.0 ) continue;
-		dist.subVectors(this.crack[i].offset, pos);
+		dist.addVectors(this.crack[i].offset, this.pos);
+		dist.sub(pos);
 		var len = dist.lengthSq();
 		if( len < rockConfig.distThreshold ){
 			this.crack[i].detach( Math.random() < 0.3 );
@@ -157,7 +158,7 @@ RockCrack.prototype.detach = function( outburst ){
 	}
 }
 
-RockCrack.prototype.update = function( ) {
+RockCrack.prototype.update = function( position ) {
 	if( this.mode < 1 ) return;
 
 	//rotation
@@ -183,7 +184,9 @@ RockCrack.prototype.update = function( ) {
 
 	this.velocity.x = this.pos.x - this.velocity.x;
 	this.velocity.z = this.pos.z - this.velocity.z;
-	this.mesh.position.set( this.pos.x + this.offset.x, this.pos.y + this.offset.y, this.pos.z + this.offset.z );
+	this.mesh.position.set( position.x + this.pos.x + this.offset.x, 
+							position.y + this.pos.y + this.offset.y, 
+							position.z + this.pos.z + this.offset.z );
 };
 
 RockCore.prototype.update = function() {
@@ -258,10 +261,6 @@ function LoadMat( texDiffuse, texNormal, nameRock, nameMonolite ){
 			
 	uniformsmono[ "uBaseColor"].value     	= new THREE.Color( 0xffffff );
 	
-	//uniformsmono[ "uLightPositions"].value	= [ new THREE.Vector3( -200, 60, -200 ), new THREE.Vector3( 200, 0, 200 ) ];
-	//uniformsmono[ "uLightRadiuses"].value   = [ 25.0, 25.0 ];
-	//uniformsmono[ "uLightColors" ].value	= [ new THREE.Vector3( 119, 132, 153 ), new THREE.Vector3( 73, 84, 104 ) ];
-					
 	var parametersmono = { fragmentShader: 	shadermono.fragmentShader, 
 						   vertexShader: 	shadermono.vertexShader, 
 						   uniforms: 		uniformsmono, 
@@ -307,11 +306,12 @@ function LoadRockParticle( cnt, max, scaleMin, scaleMax ){
 }
 
 //TODO: need to compile OBJs into json files for fast loading
-function CreateRock( idx, cnt, scale ){
+function CreateRock( idx, cnt, scale, pos ){
 	var manager = new THREE.LoadingManager();
 	manager.onProgress = function ( item, loaded, total ) { };
 	
 	var rock = new RockAssemble();
+	rock.pos = pos;
 
 	var matrix = new THREE.Matrix4;
 	matrix.multiplyScalar(scale);
@@ -338,16 +338,18 @@ function CreateRock( idx, cnt, scale ){
 					crack.offset 	= child.geometry.boundingBox.center();
 					
 					child.geometry.applyMatrix( new THREE.Matrix4().makeTranslation( - crack.offset.x, - crack.offset.y, - crack.offset.z ) );
-					child.position.set( crack.offset.x, crack.offset.y, crack.offset.z );
-					child.castShadow 	= true;
+					child.position.set( pos.x + crack.offset.x, 
+										pos.y + crack.offset.y, 
+										pos.z + crack.offset.z );
+					//child.castShadow 	= true;
 				
 					crack.mesh 	 	= child;
 					crack.rotAxis.set( Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5 );
 					crack.rotAxis.normalize();
 					crack.rotTarget = 0.005 + 0.05 * Math.random();
 					crack.rotSpeed	= (1 + 9 * Math.random()) * crack.rotTarget;
-					crack.maxSpeed  = 0.035 + 0.15 * Math.random();
-					crack.speed 	= 3 * crack.maxSpeed;
+					crack.maxSpeed  = 0.075 + 0.35 * Math.random();
+					crack.speed 	= 2 * crack.maxSpeed;
 					
 					rock.bound.union(child.geometry.boundingBox);
 					rock.crackMesh.push(child);
@@ -365,12 +367,10 @@ function CreateRock( idx, cnt, scale ){
 				child.material = coreMat;
 				child.geometry.applyMatrix(matrix);
 				child.receiveShadow = true; 
-				//child.castShadow 	= true; //TODO: fix this bug
-				//child.geometry.computeBoundingBox ();
-				//var center 	= child.geometry.boundingBox.center();
-				//child.geometry.applyMatrix( new THREE.Matrix4().makeTranslation( - center.x, - center.y, - center.z ) );
-				//child.position.set( center.x, center.y, center.z );
-				
+				child.castShadow 	= true;
+				child.position.set( pos.x, pos.y, pos.z );
+				child.geometry.computeBoundingBox ();
+
 				var core = new RockCore();
 				core.mesh = child;
 				core.mesh.rotation.y = 1.3; //somehow the rotation is off
