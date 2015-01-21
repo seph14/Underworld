@@ -9,6 +9,8 @@ var FAR  = 10000;
 var NEAR = 1;
 var touchable;
 
+var mouse = {};
+
 var container, stats;
 var camera, scene, renderer;
 var cameraCube, sceneCube, skyMesh;
@@ -27,6 +29,9 @@ function initScene() {
 		Detector.addGetWebGLMessage();
 		return;
 	}
+
+	mouse.x = 0;
+	mouse.y = 0;
 
 	touchable = is_touch_device();
 	container = document.getElementById( 'viewport' );
@@ -101,8 +106,9 @@ function initScene() {
 	renderer.gammaOutput = true;
 
 	//
-	/*camControl = new THREE.OrbitControls( camera, renderer.domElement );
-	//camControl.target.set( 0, 0, 0 );
+	/*
+	camControl = new THREE.OrbitControls( camera, renderer.domElement );
+	camControl.target.set( 0, 0, 0 );
 
 	camControl.rotateSpeed = 1.0;
 	camControl.zoomSpeed = 1.2;
@@ -113,7 +119,9 @@ function initScene() {
 
 	camControl.staticMoving = true;
 	camControl.dynamicDampingFactor = 0.15;
-	camControl.keys = [ 65, 83, 68 ];*/
+	camControl.keys = [ 65, 83, 68 ];
+	*/
+
 
 	//skybox
 	var path = "textures/skydark/";
@@ -176,11 +184,22 @@ function initScene() {
 	LoadTerrain();
 	LoadDummy();
 
+	/*
 	for( var i = 0; i < 4; i++ ){
 		for( var j = 0; j < 4; j++ ){
 			rocks.push(CreateRock(0, 153, 10, 
 			new THREE.Vector3(-688 + 160 * i, -296, -237 + j * 160 )));
 		}
+	}
+	*/
+	for( var i = 0; i < 5; i++ ){
+
+			var nx = Math.sin(Math.PI*2*i/5)*256;
+			var ny = -316;
+			var nz = Math.cos(Math.PI*2*i/5)*256;
+			//var stonePos = new THREE.Vector3(-688 + 256 * i, -316, -237 + j * 256 );
+			var stonePos = new THREE.Vector3(nx, ny, nz);
+			rocks.push(CreateRock(0, 153, 20, stonePos));
 	}
 
 	//EVENTS
@@ -237,7 +256,8 @@ function onDocumentMouseDown( event ){
 }
 
 function onDocumentMouseMove( event ) {	
-
+	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+    mouse.y = ( event.clientY / window.innerHeight ) * 2 - 1;
 }
 
 function animate() {
@@ -262,7 +282,27 @@ function render() {
 		p.z     = rocks[3].pos.z;
 		camera.lookAt( p ); //not working???
 	}
+
+	// camera.position.set( -144.52, -394.97, -289.79 );
 	
+	var targetX = -223+mouse.x*20;
+	var targetZ = -290+mouse.x*20;
+	var targetY = -392+mouse.y*2;
+	camera.position.x+= (targetX-camera.position.x)/10;
+	//camera.position.z+= (targetZ-camera.position.z)/10;
+	camera.position.y+= (targetY-camera.position.y)/10;
+	
+
+	var op = "<tt>";
+	op+= camera.position.x+"<br>";
+	op+= camera.position.y+"<br>";
+	op+= camera.position.z+"<br>";
+	op+= "</tt>";
+	document.getElementById("console").innerHTML = ""+op;
+
+	var target = new THREE.Vector3(0,-200,0);
+	camera.lookAt(rocks[0].pos);
+	camera.lookAt(target);
 	// render scene
 
 	//renderer.render( scene, camera );
