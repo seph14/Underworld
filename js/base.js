@@ -99,7 +99,7 @@ function LoadTerrain( ){
 	var onError 	= function ( xhr ) { trace("file not found"); };
 
 	var matrix = new THREE.Matrix4;
-	matrix.multiplyScalar(0.2);
+	matrix.multiplyScalar(1.0);
 	// model
 	var loader = new THREE.OBJLoader( manager );
 
@@ -111,7 +111,7 @@ function LoadTerrain( ){
 				child.geometry.computeVertexNormals ();
 				child.material = terrainMatA;
 				child.geometry.applyMatrix(matrix);
-				//child.receiveShadow = true; 
+				child.receiveShadow = true; 
 				child.castShadow 	= true;
 				scene.add(child);
 			}
@@ -142,7 +142,7 @@ function LoadDummy(){
 	var onError 	= function ( xhr ) { trace("file not found"); };
 
 	var matrix = new THREE.Matrix4;
-	matrix.multiplyScalar(0.2);
+	matrix.multiplyScalar(1.0);
 	// model
 	var loader = new THREE.OBJLoader( manager );
 
@@ -153,6 +153,7 @@ function LoadDummy(){
 				child.geometry.computeFaceNormals ();
 				child.geometry.computeVertexNormals ();
 				child.material = charMat;
+				child.position.set( 0, 2, 0 );
 				child.geometry.applyMatrix(matrix);
 				child.receiveShadow = true; 
 				child.castShadow 	= true;

@@ -67,6 +67,10 @@ function RockCore () {
 
 //update position when dropping down or 
 RockAssemble.prototype.update = function() {
+	if( this.breakPer > 1.0 ){
+		this.pos.y += 0.2;
+		this.core.update( this.pos );
+	}
 	for( var i = this.crack.length-1; i >= 0; i-- ){
 		this.crack[i].update( this.pos );
 	}
@@ -80,13 +84,10 @@ RockAssemble.prototype.update = function() {
 			i ++;
 		}
 	}
-	if( this.breakPer > 1.0 ){
-		this.core.update( this.pos );
-	}
 };
 
 RockAssemble.prototype.dropParticle = function( point ){
-	var cnt 	= Math.floor(50 + 50 * Math.random()); 
+	var cnt 	= Math.floor(100 + 50 * Math.random()); 
 	var offset 	= new THREE.Vector3();
 	
 	offset.subVectors(point, this.pos);
@@ -189,11 +190,14 @@ RockCrack.prototype.update = function( position ) {
 							position.z + this.pos.z + this.offset.z );
 };
 
-RockCore.prototype.update = function() {
+RockCore.prototype.update = function( pos ) {
 	this.speed		+= (this.maxSpeed - this.speed) * 0.005;
 	this.mesh.rotation.x += this.speed * this.rotAxis.x;
 	this.mesh.rotation.y += this.speed * this.rotAxis.y;
 	this.mesh.rotation.z += this.speed * this.rotAxis.z;
+	this.mesh.position.x  = pos.x;
+	this.mesh.position.y  = pos.y;
+	this.mesh.position.z  = pos.z;
 };
 
 RockParticle.prototype.update = function() {
@@ -341,7 +345,7 @@ function CreateRock( idx, cnt, scale, pos ){
 					child.position.set( pos.x + crack.offset.x, 
 										pos.y + crack.offset.y, 
 										pos.z + crack.offset.z );
-					//child.castShadow 	= true;
+					child.castShadow 	= true;
 				
 					crack.mesh 	 	= child;
 					crack.rotAxis.set( Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5 );
@@ -366,7 +370,7 @@ function CreateRock( idx, cnt, scale, pos ){
 			if ( child instanceof THREE.Mesh ) {
 				child.material = coreMat;
 				child.geometry.applyMatrix(matrix);
-				child.receiveShadow = true; 
+				child.receiveShadow = false; 
 				child.castShadow 	= true;
 				child.position.set( pos.x, pos.y, pos.z );
 				child.geometry.computeBoundingBox ();

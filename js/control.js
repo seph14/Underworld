@@ -40,47 +40,51 @@ function initScene() {
 	}
 
 	// SCENE
-	scene = new THREE.Scene();
-	sceneCube = new THREE.Scene();
-	scene.fog = new THREE.Fog( 0xcdcdcd, 100, FAR );
+	scene 			= new THREE.Scene();
+	sceneCube 		= new THREE.Scene();
+	scene.fog 		= new THREE.FogExp2( 0xccc9c2, 0.0009 );
+	sceneCube.fog 	= new THREE.FogExp2( 0xccc9c2, 0.0007 );
 
 	// CAMERA
 	camera = new THREE.PerspectiveCamera( 60, SCREEN_WIDTH / SCREEN_HEIGHT, NEAR, FAR );
-	camera.position.set( -154.4030650483917, -78.94138544243742, -51.83980437693978 );
-	camera.rotation.set( 2.509096643512917,  -1.1437036559358629, 2.707562454136679 );
+	camera.position.set( -144.52, -394.97, -289.79 );
+	camera.lookAt( new THREE.Vector3(-688 + 160 * 0, -16, -237 + 3 * 160 ) );
 
 	cameraCube = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 100000 );
 	
-	ambientLight = new THREE.AmbientLight( 0x3f2806 );
-	scene.add( ambientLight );
+	//ambientLight = new THREE.AmbientLight( 0x3f2806 );
+	//scene.add( ambientLight );
 
-	sunLight = new THREE.SpotLight( 0xcad1dd, 1.0, 0, Math.PI / 2, 1 );
-	sunLight.position.set( 1000, 100, 1000 );
-	sunLight.rotation.set(  1.2, 0, 0 );
+	sunLight = new THREE.DirectionalLight( 0x886c91 );//, 1.0, 0, Math.PI / 2, 1 );
+	sunLight.position.set( 0, 360, 0 );
+	sunLight.target.position.set(0, 0, 0);
 	sunLight.castShadow 	  = true;
 	sunLight.shadowDarkness   = 0.3;
 	sunLight.shadowBias 	  = -0.002;
 	sunLight.shadowCameraNear = 100;
 	sunLight.shadowCameraFar  = 2000;
-	sunLight.shadowCameraFov  = 20;
+	sunLight.shadowCameraFov  = 10;
 	sunLight.shadowMapWidth	  = 512;
 	sunLight.shadowMapHeight  = 512;
 	sunLight.shadowCameraVisible = false;
 	scene.add( sunLight );
 
-	var direct1 = new THREE.DirectionalLight( 0xcad1dd, 1.0 );
-	direct1.position.set( 1000, 100, 1000 );
-	direct1.rotation.set(  1.2, 0, 0 );
-	scene.add( direct1 );
+	var light = new THREE.DirectionalLight( 0x92798c, 0.4 );
+	light.position.set( 0, -200, 0 );
+	light.target.position.set(  0, 0, 0 );
+	scene.add( light );
+
+	//var dlightHelper = new THREE.DirectionalLightHelper(light, 50); 
+  	//scene.add( dlightHelper);
 	
-	directionalLight = new THREE.DirectionalLight( 0xcfdff9, 1.0 );
-	directionalLight.position.set( -100, 200, -100 );
-	directionalLight.rotation.set( 0.8, 0.1, 0.8 );
+	directionalLight = new THREE.DirectionalLight( 0xffffff, 0.9 );
+	directionalLight.position.set( 0, -100, 0 );
+	directionalLight.target.position.set(  0, 0, 0 );
 	scene.add( directionalLight );
 
 	// RENDERER
 	renderer = new THREE.WebGLRenderer( { antialias: false, precision: "mediump" } );
-	//renderer.setClearColor( scene.fog.color, 1 );
+	renderer.setClearColor( scene.fog.color, 1 );
 	renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
 
 	renderer.domElement.style.position = "absolute";
@@ -97,8 +101,8 @@ function initScene() {
 	renderer.gammaOutput = true;
 
 	//
-	camControl = new THREE.OrbitControls( camera, renderer.domElement );
-	camControl.target.set( 0, 0, 0 );
+	/*camControl = new THREE.OrbitControls( camera, renderer.domElement );
+	//camControl.target.set( 0, 0, 0 );
 
 	camControl.rotateSpeed = 1.0;
 	camControl.zoomSpeed = 1.2;
@@ -109,8 +113,7 @@ function initScene() {
 
 	camControl.staticMoving = true;
 	camControl.dynamicDampingFactor = 0.15;
-
-	camControl.keys = [ 65, 83, 68 ];
+	camControl.keys = [ 65, 83, 68 ];*/
 
 	//skybox
 	var path = "textures/skydark/";
@@ -147,18 +150,16 @@ function initScene() {
 	var renderModel  = new THREE.RenderPass( scene, camera );
 
 	renderer.autoClear = false;
-	renderModel.clear = false;
+	renderModel.clear = true;
 
 	effectFXAA = new THREE.ShaderPass( THREE.FXAAShader );
 	effectFXAA.uniforms[ 'resolution' ].value.set( 1 / SCREEN_WIDTH, 1 / SCREEN_HEIGHT );
 	effectFXAA.renderToScreen = true;
 
 	composer = new THREE.EffectComposer( renderer, renderTarget );
-	composer.addPass( renderSky   );
+	//composer.addPass( renderSky   );
 	composer.addPass( renderModel );
 	composer.addPass( effectFXAA );
-	
-	//camera.position.set( -154.4030650483917, -78.94138544243742, -51.83980437693978 );
 	
 	if( debug ){
 		CreateRockGUI();
@@ -175,41 +176,12 @@ function initScene() {
 	LoadTerrain();
 	LoadDummy();
 
-	rocks.push(CreateRock(0, 153, 3, 
-		new THREE.Vector3(-138,-63,-44)));
-	rocks.push(CreateRock(0, 153, 3, 
-		new THREE.Vector3(-101,-63,-44)));
-	rocks.push(CreateRock(0, 153, 3, 
-		new THREE.Vector3(-64, -63,-44)));
-	rocks.push(CreateRock(0, 153, 3, 
-		new THREE.Vector3(-27, -63,-44)));
-
-	rocks.push(CreateRock(0, 153, 3, 
-		new THREE.Vector3(-138,-63,-7)));
-	rocks.push(CreateRock(0, 153, 3, 
-		new THREE.Vector3(-101,-63,-7)));
-	rocks.push(CreateRock(0, 153, 3, 
-		new THREE.Vector3(-64, -63,-7)));
-	rocks.push(CreateRock(0, 153, 3, 
-		new THREE.Vector3(-27, -63,-7)));
-
-	rocks.push(CreateRock(0, 153, 3, 
-		new THREE.Vector3(-138,-63,+30)));
-	rocks.push(CreateRock(0, 153, 3, 
-		new THREE.Vector3(-101,-63,+30)));
-	rocks.push(CreateRock(0, 153, 3, 
-		new THREE.Vector3(-64, -63,+30)));
-	rocks.push(CreateRock(0, 153, 3, 
-		new THREE.Vector3(-27, -63,+30)));
-
-	rocks.push(CreateRock(0, 153, 3, 
-		new THREE.Vector3(-138,-63,+67)));
-	rocks.push(CreateRock(0, 153, 3, 
-		new THREE.Vector3(-101,-63,+67)));
-	rocks.push(CreateRock(0, 153, 3, 
-		new THREE.Vector3(-64, -63,+67)));
-	rocks.push(CreateRock(0, 153, 3, 
-		new THREE.Vector3(-27, -63,+67)));
+	for( var i = 0; i < 4; i++ ){
+		for( var j = 0; j < 4; j++ ){
+			rocks.push(CreateRock(0, 153, 10, 
+			new THREE.Vector3(-688 + 160 * i, -296, -237 + j * 160 )));
+		}
+	}
 
 	//EVENTS
 	document.addEventListener( 'mousemove',  onDocumentMouseMove,  false );
@@ -240,6 +212,8 @@ function onWindowResize() {
 }
 
 function onKeyDown( event ){
+	trace( camera.position );
+	trace( camera );
 }
 
 function onDocumentMouseDown( event ){
@@ -274,12 +248,21 @@ function animate() {
 
 function render() {
 	// update
-	camControl.update();
-	cameraCube.rotation.copy( camera.rotation );
+	//camControl.update();
+	//cameraCube.rotation.copy( camera.rotation );
 
 	for( var i  = rocks.length-1; i >= 0; i-- ){
 		rocks[i].update();
 	}
+	if( rocks.length > 4 ){
+		var pos = rocks[3].pos;
+		var p   = new THREE.Vector3;
+		p.x     = rocks[3].pos.x;
+		p.y     = rocks[3].pos.y + 280;
+		p.z     = rocks[3].pos.z;
+		camera.lookAt( p ); //not working???
+	}
+	
 	// render scene
 
 	//renderer.render( scene, camera );
