@@ -1,5 +1,6 @@
 'use strict';
 
+var USELIGHTS = false;
 var MARGIN = 0;
 var WIDTH = window.innerWidth || 2;
 var HEIGHT = window.innerHeight || ( 2 + 2 * MARGIN );
@@ -47,7 +48,7 @@ function initScene() {
 	// SCENE
 	scene 			= new THREE.Scene();
 	sceneCube 		= new THREE.Scene();
-	scene.fog 		= new THREE.FogExp2( 0xccc9c2, 0.0009 );
+	scene.fog 		= new THREE.FogExp2( 0xccc9c2, 0.0011 );
 	sceneCube.fog 	= new THREE.FogExp2( 0xccc9c2, 0.0007 );
 
 	// CAMERA
@@ -71,21 +72,24 @@ function initScene() {
 	sunLight.shadowCameraFov  = 10;
 	sunLight.shadowMapWidth	  = 512;
 	sunLight.shadowMapHeight  = 512;
+	sunLight.onlyShadow		  = !USELIGHTS;
 	sunLight.shadowCameraVisible = false;
 	scene.add( sunLight );
 
-	var light = new THREE.DirectionalLight( 0x92798c, 0.4 );
-	light.position.set( 0, -200, 0 );
-	light.target.position.set(  0, 0, 0 );
-	scene.add( light );
+	if( USELIGHTS ){
+		var light = new THREE.DirectionalLight( 0x92798c, 0.4 );
+		light.position.set( 0, -200, 0 );
+		light.target.position.set(  0, 0, 0 );
+		scene.add( light );
 
-	//var dlightHelper = new THREE.DirectionalLightHelper(light, 50); 
-  	//scene.add( dlightHelper);
+		//var dlightHelper = new THREE.DirectionalLightHelper(light, 50); 
+  		//scene.add( dlightHelper);
 	
-	directionalLight = new THREE.DirectionalLight( 0xffffff, 0.9 );
-	directionalLight.position.set( 0, -100, 0 );
-	directionalLight.target.position.set(  0, 0, 0 );
-	scene.add( directionalLight );
+		directionalLight = new THREE.DirectionalLight( 0xffffff, 0.9 );
+		directionalLight.position.set( 0, -100, 0 );
+		directionalLight.target.position.set(  0, 0, 0 );
+		scene.add( directionalLight );
+	}
 
 	// RENDERER
 	renderer = new THREE.WebGLRenderer( { antialias: false, precision: "mediump" } );
@@ -175,12 +179,17 @@ function initScene() {
 
 	// BASE SCENE
 	//CreateBase01( );
-	LoadMat("Rock_A_01_Diffuse.png",
-			"Rock_A_01_Normal.png",
-			"PBR_Bump", 
-			"PBR_Color");
-	LoadRockParticle( 12, 153, 0.3, 0.6 );
-	LoadTerrainMat();
+	if( USELIGHTS ){
+		LoadLightMat	("Rock_A_01_Diffuse.png", "Rock_A_01_Normal.png");
+		LoadTerrainMatLight();
+	}else{
+		LoadEnvCubeMat	("Rock_A_01_Diffuse.png", "Rock_A_01_Normal.png");	
+		LoadTerrainMatEnvMap();
+	}
+	
+	//LoadRockParticle( 12, 153, 0.3, 0.6 );
+	PrepareRockParticle( 5000, 0.5, 0.9 );
+
 	LoadTerrain();
 	LoadDummy();
 
@@ -231,8 +240,9 @@ function onWindowResize() {
 }
 
 function onKeyDown( event ){
-	trace( camera.position );
-	trace( camera );
+	//trace( camera.position );
+	//trace( camera );
+	trace( rockParticle );
 }
 
 function onDocumentMouseDown( event ){
@@ -274,6 +284,10 @@ function render() {
 	for( var i  = rocks.length-1; i >= 0; i-- ){
 		rocks[i].update();
 	}
+
+	rockParticle.update( rocks[3].scaler );
+
+	/*
 	if( rocks.length > 4 ){
 		var pos = rocks[3].pos;
 		var p   = new THREE.Vector3;
@@ -281,7 +295,7 @@ function render() {
 		p.y     = rocks[3].pos.y + 280;
 		p.z     = rocks[3].pos.z;
 		camera.lookAt( p ); //not working???
-	}
+	}*/
 
 	// camera.position.set( -144.52, -394.97, -289.79 );
 	
@@ -297,6 +311,7 @@ function render() {
 	op+= camera.position.x+"<br>";
 	op+= camera.position.y+"<br>";
 	op+= camera.position.z+"<br>";
+	op+= rocks[3].scaler+"<br>";
 	op+= "</tt>";
 	document.getElementById("console").innerHTML = ""+op;
 

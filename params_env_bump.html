@@ -62,9 +62,8 @@
 		
 		var container, stats;
 		var camera, scene, renderer;
-		var ambientLight, sunLight, directionalLight;
 		var camControl;
-
+		
 		var rockMesh = [], rockMat;
 		var composer, effectFXAA;
 
@@ -100,33 +99,6 @@
 			camera = new THREE.PerspectiveCamera( 45, SCREEN_WIDTH / SCREEN_HEIGHT, NEAR, FAR );
 			camera.position.set( 80, -130, 80 );
 			camera.lookAt( scene.position );
-
-			/*var sunLight = new THREE.DirectionalLight( 0x886c91 );//, 1.0, 0, Math.PI / 2, 1 );
-			sunLight.position.set( 0, 360, 0 );
-			sunLight.target.position.set(0, 0, 0);
-			sunLight.castShadow 	  = true;
-			sunLight.shadowDarkness   = 0.3;
-			sunLight.shadowBias 	  = -0.002;
-			sunLight.shadowCameraNear = 100;
-			sunLight.shadowCameraFar  = 2000;
-			sunLight.shadowCameraFov  = 10;
-			sunLight.shadowMapWidth	  = 512;
-			sunLight.shadowMapHeight  = 512;
-			sunLight.shadowCameraVisible = false;
-			scene.add( sunLight );
-
-			var light = new THREE.DirectionalLight( 0x92798c, 0.4 );
-			light.position.set( 0, -200, 0 );
-			light.target.position.set(  0, 0, 0 );
-			scene.add( light );
-
-			var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.9 );
-			directionalLight.position.set( 0, -100, 0 );
-			directionalLight.target.position.set(  0, 0, 0 );
-			scene.add( directionalLight );*/
-
-			var hemiLight = new THREE.HemisphereLight(0xdfca99, 0xfff, 1.0);
-			scene.add( hemiLight );
 
 			// RENDERER
 			renderer = new THREE.WebGLRenderer( { antialias: false, precision: "mediump" } );
@@ -178,7 +150,19 @@
 			composer.addPass( renderModel );
 			composer.addPass( effectFXAA );
 
-			var shader 	 = THREE.ShaderPBR[ "PBR_Bump" ];
+			////////////////////////////////////////////////////////////////
+			//environemnt map
+			var path = "textures/envmap/";
+			var format = '.png';
+			var urls = [
+					path + 'px' + format, path + 'nx' + format,
+					path + 'py' + format, path + 'ny' + format,
+					path + 'pz' + format, path + 'nz' + format
+				];
+			var textureCube = THREE.ImageUtils.loadTextureCube( urls, new THREE.CubeRefractionMapping() );
+			////////////////////////////////////////////////////////////////
+			//shader stuff			
+			var shader 	 = THREE.ShaderPBR[ "PBR_Env_Bump" ];
 			var uniforms = THREE.UniformsUtils.clone( shader.uniforms );
 
 			uniforms[ "uBaseColorMap" ].value 		= THREE.ImageUtils.loadTexture( "textures/Rock_A_01_Diffuse.png" );
@@ -190,25 +174,25 @@
 			uniforms[ "uNormalMap" ].value.wrapS 	= THREE.RepeatWrapping;
 			uniforms[ "uNormalMap" ].value.wrapT 	= THREE.RepeatWrapping;
 			uniforms[ "uNormalMap" ].value.repeat.set( 2, 2 );
-	
+
+			uniforms[ "uCubeMapTex" ].value 	= textureCube;
 			uniforms[ "uRoughness" ].value    	= 0.8;	
+			uniforms[ "uRoughness4" ].value    	= 0.8 * 0.8 * 0.8 * 0.8;	
 			uniforms[ "uMetallic"  ].value    	= 0.3;	
 			uniforms[ "uSpecular"  ].value    	= 0.3;	
-			uniforms[ "uDetails"   ].value    	= 1.0;	
 			uniforms[ "uExposure"  ].value    	= 6.3375;
 			uniforms[ "uGamma" 	   ].value    	= 2.2;			
-			uniforms[ "uBaseColor"].value     	= new THREE.Color( 0x413e3c );
+			uniforms[ "uBaseColor"].value     	= new THREE.Color( 0x251a22 );
 			
 			var parameters = { fragmentShader: 	shader.fragmentShader, 
 							   vertexShader: 	shader.vertexShader, 
 							   uniforms: 		uniforms, 
-							   lights: 			true, 
+							   lights: 			false, 
 							   fog: 			true,
 							   morphTargets:    false,
 							   morphNormals:    false,
 							   shading: 		THREE.SmoothShading };
 			rockMat = new THREE.ShaderMaterial( parameters );
-			console.log(rockMat);
 			var manager = new THREE.LoadingManager();
 			manager.onProgress = function ( item, loaded, total ) { };
 	
@@ -232,7 +216,6 @@
 						var offset 	= child.geometry.boundingBox.center();
 						child.geometry.applyMatrix( new THREE.Matrix4().makeTranslation( - offset.x, - offset.y, - offset.z ) );
 						child.position.set( offset.x, offset.y, offset.z );
-						//child.castShadow 	= true;
 						scene.add(child);
 						rockMesh.push(child);
 					}
@@ -246,19 +229,18 @@
 			window.addEventListener  ( 'keydown',    onKeyDown,            false ); 
 			var gui = new dat.GUI();
 			gui.add( paramConfig, 'uRoughness', 0.0, 1.0 ).onChange( function() {
-				rockMat.uniforms.uRoughness.value = paramConfig.uRoughness;
+				rockMat.uniforms.uRoughness.value  = 0.0001 + paramConfig.uRoughness;
+				rockMat.uniforms.uRoughness4.value = 0.0001 + 
+					paramConfig.uRoughness * paramConfig.uRoughness *
+					paramConfig.uRoughness * paramConfig.uRoughness;
 			});
-
+	
 			gui.add( paramConfig, 'uMetallic', 0.0, 1.0 ).onChange( function() {
 				rockMat.uniforms.uMetallic.value = paramConfig.uMetallic;
 			});
 
 			gui.add( paramConfig, 'uSpecular', 0.0, 1.0 ).onChange( function() {
 				rockMat.uniforms.uSpecular.value = paramConfig.uSpecular;
-			});
-
-			gui.add( paramConfig, 'uDetails', 0.0, 1.0 ).onChange( function() {
-				rockMat.uniforms.uDetails.value = paramConfig.uDetails;
 			});
 
 			gui.add( paramConfig, 'uExposure', 0.0, 10.0 ).onChange( function() {
