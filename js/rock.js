@@ -432,7 +432,7 @@ function PrepareRockParticle( cnt, scaleMin, scaleMax ){
 		//color, random in hsl
 		//color.setHSL( 0.85 + 0.1 * Math.random(), 0.3, 0.11 );
 		rockParticle.particleColor[3*i+0] = color.r;
-		rockParticle.particleColor[3*i+1] = color.g;
+		rockParticle.particleColor[255-3*i+1] = color.g;
 		rockParticle.particleColor[3*i+2] = color.b;
 		//size, randomize
 		rockParticle.particleSize[i]	  = scaleMin + Math.random() * (scaleMax - scaleMin);
