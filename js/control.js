@@ -13,7 +13,7 @@ var touchable;
 var mouse = {};
 
 var container, stats;
-var camera, cameraTwo, scene, renderer;
+var camera, cameraOne, cameraTwo, scene, renderer;
 var cameraCube, sceneCube, skyMesh;
 var ambientLight, sunLight, directionalLight;
 var camControl;
@@ -59,6 +59,10 @@ function initScene() {
 	camera.position.set( -144.52, -394.97, -289.79 );
 	camera.lookAt( new THREE.Vector3(-688 + 160 * 0, -16, -237 + 3 * 160 ) );
 
+	cameraOne = new THREE.PerspectiveCamera( 60, SCREEN_WIDTH / SCREEN_HEIGHT, NEAR, FAR );
+	cameraOne.position.set( -144.52, -394.97, -289.79 );
+	cameraOne.lookAt( new THREE.Vector3(-688 + 160 * 0, -16, -237 + 3 * 160 ) );
+
 	cameraTwo = new THREE.PerspectiveCamera( 60, SCREEN_WIDTH / SCREEN_HEIGHT, NEAR, FAR );
 	cameraTwo.position.set( -144.52, -394.97, -289.79 );
 	cameraTwo.lookAt( new THREE.Vector3(-688 + 160 * 0, -16, -237 + 3 * 160 ) );
@@ -75,7 +79,7 @@ function initScene() {
 
 
 	cameraControl = new AR.CameraControl();
-	cameraControl.addCamera(camera);
+	cameraControl.addCamera(cameraOne);
 	cameraControl.addCamera(cameraTwo);
 	//ambientLight = new THREE.AmbientLight( 0x3f2806 );
 	//scene.add( ambientLight );
@@ -359,6 +363,7 @@ function render() {
 	//renderer.render( scene, cameraTwo);
 
 	//renderer.clearTarget( null, 1, 1, 1 );
+	camera = cameraControl.currentCamera;
 	//composer.render( 0.1 );
 }
 
