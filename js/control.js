@@ -13,14 +13,17 @@ var touchable;
 var mouse = {};
 
 var container, stats;
-var camera, scene, renderer;
+var camera, cameraTwo, scene, renderer;
 var cameraCube, sceneCube, skyMesh;
 var ambientLight, sunLight, directionalLight;
 var camControl;
+var fpsControl;
 
 var rocks = [];
 
 var composer, effectFXAA;
+
+var cameraControl;
 
 var clock = new THREE.Clock();
 
@@ -56,8 +59,24 @@ function initScene() {
 	camera.position.set( -144.52, -394.97, -289.79 );
 	camera.lookAt( new THREE.Vector3(-688 + 160 * 0, -16, -237 + 3 * 160 ) );
 
+	cameraTwo = new THREE.PerspectiveCamera( 60, SCREEN_WIDTH / SCREEN_HEIGHT, NEAR, FAR );
+	cameraTwo.position.set( -144.52, -394.97, -289.79 );
+	cameraTwo.lookAt( new THREE.Vector3(-688 + 160 * 0, -16, -237 + 3 * 160 ) );
+
 	cameraCube = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 100000 );
 	
+
+	fpsControl = new THREE.FirstPersonControls(cameraTwo);
+	fpsControl.movementSpeed = 110.1;
+	fpsControl.lookSpeed = 0.001;
+	fpsControl.lookVertical = true;
+	fpsControl.movementSpeed = 70;
+                fpsControl.noFly = false;
+
+
+	cameraControl = new AR.CameraControl();
+	cameraControl.addCamera(camera);
+	cameraControl.addCamera(cameraTwo);
 	//ambientLight = new THREE.AmbientLight( 0x3f2806 );
 	//scene.add( ambientLight );
 
@@ -242,7 +261,7 @@ function onWindowResize() {
 function onKeyDown( event ){
 	//trace( camera.position );
 	//trace( camera );
-	trace( rockParticle );
+	//trace( rockParticle );
 }
 
 function onDocumentMouseDown( event ){
@@ -281,6 +300,10 @@ function render() {
 	//camControl.update();
 	//cameraCube.rotation.copy( camera.rotation );
 
+	cameraControl.update();
+
+
+
 	for( var i  = rocks.length-1; i >= 0; i-- ){
 		rocks[i].update();
 	}
@@ -302,10 +325,15 @@ function render() {
 	var targetX = -223+mouse.x*20;
 	var targetZ = -290+mouse.x*20;
 	var targetY = -392+mouse.y*2;
-	camera.position.x+= (targetX-camera.position.x)/10;
+	//camera.position.x+= (targetX-camera.position.x)/10;
 	//camera.position.z+= (targetZ-camera.position.z)/10;
-	camera.position.y+= (targetY-camera.position.y)/10;
+	//camera.position.y+= (targetY-camera.position.y)/10;
 	
+	cameraControl.setCameraTargetPos(0,targetX,targetY,targetZ);
+
+	var delta = clock.getDelta();
+
+            fpsControl.update(delta);
 
 	var op = "<tt>";
 	op+= camera.position.x+"<br>";
@@ -316,13 +344,16 @@ function render() {
 	document.getElementById("console").innerHTML = ""+op;
 
 	var target = new THREE.Vector3(0,-200,0);
-	camera.lookAt(rocks[0].pos);
-	camera.lookAt(target);
+	/*camera.lookAt(rocks[0].pos);*/
+	cameraControl.lookAt(0,target);
+
 	// render scene
 
-	//renderer.render( scene, camera );
+	renderer.render( scene, cameraControl.currentCamera );
+	//renderer.render( scene, cameraTwo);
+
 	//renderer.clearTarget( null, 1, 1, 1 );
-	composer.render( 0.1 );
+	//composer.render( 0.1 );
 }
 
 window.onload = initScene;
