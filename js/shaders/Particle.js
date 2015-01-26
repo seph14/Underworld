@@ -54,7 +54,8 @@ THREE.ShaderParticle = {
 
 			//"varying vec3 vEyePosition;",
 			"varying vec3 vColor;",
-			
+			"varying vec3 vNormal;",
+
 			//THREE.ShaderChunk[ "shadowmap_pars_fragment" ],
 			THREE.ShaderChunk[ "fog_pars_fragment" ],
 			
@@ -99,10 +100,11 @@ THREE.ShaderParticle = {
 			"void main() {",
 				//"vec3 N                  = normalize( vec3(1,0,0) );",
 				//"vec3 V                  = normalize( vEyePosition );",
-	
+			
 				//"vec3 baseColor			= texture2D( uBaseColorMap, gl_PointCoord ).rgb * vColor;",
-				"float alpha 				= texture2D( uBaseColorMap, gl_PointCoord ).a;",
-				"vec3 color					= texture2D( uBaseColorMap, gl_PointCoord ).rgb * vColor;",
+				"vec4 texColor 				= texture2D( uBaseColorMap, gl_PointCoord );"
+				"float alpha 				= texColor.a;",
+				"vec3 color					= texColor.rgb * vColor;",
 				
 				// deduce the specular color from the baseColor and how metallic the material is
 				//"vec3 specularColor		= mix( vec3( 0.08 * uSpecular ), baseColor, uMetallic );",
@@ -128,7 +130,7 @@ THREE.ShaderParticle = {
 				//"color					= color * whiteScale;",
 	
 				// gamma correction
-				"color					= pow( color, vec3( 1.0 / uGamma ) );",
+				//"color					= pow( color, vec3( 1.0 / uGamma ) );",
 	
 				// output the fragment color
     			"gl_FragColor           = vec4( color, alpha );",
@@ -142,6 +144,7 @@ THREE.ShaderParticle = {
 
 			//"varying vec3 		vEyePosition;",
 			"varying vec3 		vColor;",
+			"varying vec3 		vNormal",
 
 			"attribute float    size;",
 			"attribute vec3 	pcolor;",
@@ -152,7 +155,8 @@ THREE.ShaderParticle = {
 
 			    "vec4 worldPosition		= modelMatrix * vec4(position,1.0);;",
     			"vec4 viewSpacePosition	= viewMatrix * worldPosition;",
-	
+				"vNormal 				= normalize( normalMatrix * normal );",
+				
 				//"vEyePosition			= - worldPosition.xyz;", //wrong math??
 				"gl_PointSize 			= size * ( 600.0 / length( viewSpacePosition.xyz ) );",
 				"vColor					= pcolor;",

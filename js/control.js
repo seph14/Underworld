@@ -206,8 +206,7 @@ function initScene() {
 		LoadTerrainMatEnvMap();
 	}
 	
-	//LoadRockParticle( 12, 153, 0.3, 0.6 );
-	PrepareRockParticle( 5000, 0.5, 0.9 );
+	PrepareRockParticle( 5000, 0.25, 0.45 );
 
 	LoadTerrain();
 	LoadDummy();
@@ -348,8 +347,15 @@ function render() {
 	cameraControl.lookAt(0,target);
 
 	// render scene
+	camera.rotation.copy( cameraControl.currentCamera.rotation );
+	camera.position.set( cameraControl.currentCamera.position.x,
+						 cameraControl.currentCamera.position.y,
+						 cameraControl.currentCamera.position.z );
+	//copy camera rotation + position so we can keep using composer setting
+	//where fxaa is preserved.
+	composer.render( 0.1 );
 
-	renderer.render( scene, cameraControl.currentCamera );
+	//renderer.render( scene, cameraControl.currentCamera );
 	//renderer.render( scene, cameraTwo);
 
 	//renderer.clearTarget( null, 1, 1, 1 );

@@ -5,9 +5,13 @@ var coreMat;
 var rockParticle;
 
 var rockConfig = {
-		distThreshold 	: 800,
-		rockParticleCnt	: 5000,
-		terrainLevel	: -400
+		distThreshold 		: 800,
+		rockParticleCnt		: 5000,
+		terrainLevel		: -400,
+		dropPercentage		: 0.8,
+		gravity				: 0.001,
+		crackOrbitScaler	: 2.5,
+		crackOrbitRadius	: 0.65
 };
 
 function RockAssemble () {
@@ -108,7 +112,7 @@ RockAssemble.prototype.cast = function( raycaster ) {
 		dist.sub(pos);
 		var len = dist.lengthSq();
 		if( len < rockConfig.distThreshold ){
-			this.crack[i].detach( Math.random() < 0.3 );
+			this.crack[i].detach( (Math.random() < 0.3), this.pos.y );
 			cnt --;
 			if(cnt < 0) break;
 		}
@@ -118,7 +122,7 @@ RockAssemble.prototype.cast = function( raycaster ) {
 		( (this.breakPer > 0.5) && (Math.random() < 0.3 * this.breakPer) ) ){
 		for( var i = (this.crack.length-1); i >= 0; i-- ){
 			if( this.crack[i].mode < 1.0 )
-				this.crack[i].detach( Math.random() < 0.5 );
+				this.crack[i].detach( (Math.random() < 0.5), this.pos.y );
 		}
 		this.breakPer = 1.1;
 	}
@@ -126,46 +130,86 @@ RockAssemble.prototype.cast = function( raycaster ) {
 	return true;
 };
 
-RockCrack.prototype.detach = function( outburst ){
-	this.mode = 1.0;
-	this.pos  = this.offset;
+RockCrack.prototype.detach = function( outburst, level ){
+	this.mode 	= 1.0;
+	this.pos.x  = this.offset.x;
+	this.pos.y  = this.offset.y;
+	this.pos.z  = this.offset.z;
+	
 	if(outburst){
 		this.pos.multiplyScalar( 0.5 + Math.random() * 0.7 );		
 		this.rotSpeed *= 1.0 + Math.random();
 	}else{
 		this.pos.multiplyScalar( 0.2 + Math.random() * 0.8 );		
 	}
+
+	if( this.type == 0 ){
+		this.offset.y = level;
+		this.speed 	  =  0;
+	}
 }
 
 RockCrack.prototype.update = function( position, scaler ) {
 	if( this.mode < 1 ) return;
 
-	//rotation
-	this.rotSpeed		 += (this.rotTarget - this.rotSpeed) * 0.04;
-	this.mesh.rotation.x += scaler * this.rotSpeed * this.rotAxis.x;
-	this.mesh.rotation.y += scaler * this.rotSpeed * this.rotAxis.y;
-	this.mesh.rotation.z += scaler * this.rotSpeed * this.rotAxis.z;
+	if( this.type == 1 ){	//orbiting cracks
+		//rotation
+		this.rotSpeed		 += (this.rotTarget - this.rotSpeed) * 0.04;
+		this.mesh.rotation.x += scaler * this.rotSpeed * this.rotAxis.x;
+		this.mesh.rotation.y += scaler * this.rotSpeed * this.rotAxis.y;
+		this.mesh.rotation.z += scaler * this.rotSpeed * this.rotAxis.z;
 
-	//revolution	
-	var prerad  = this.maxSpeed / this.speed / this.speed;
-	this.speed += ( this.maxSpeed - this.speed ) * 0.002;
-	var currad  = this.maxSpeed / this.speed / this.speed;
+		//revolution	
+		var prerad  = this.maxSpeed / this.speed / this.speed;
+		this.speed += ( this.maxSpeed - this.speed ) * 0.002;
+		var currad  = this.maxSpeed / this.speed / this.speed;
 
-	var ang     = Math.atan2( this.pos.z, this.pos.x );
-	var omega 	= this.speed / currad;
-	ang 		+= scaler * omega;
+		var ang     = Math.atan2( this.pos.z, this.pos.x );
+		var omega 	= this.speed / currad;
+		ang 		+= rockConfig.crackOrbitScaler * scaler * omega;
 
-	this.velocity.x = this.pos.x;
-	this.velocity.z = this.pos.z;
+		this.velocity.x = this.pos.x;
+		this.velocity.z = this.pos.z;
 
-	this.pos.x  = 0.95 * this.pos.x + 0.5 * currad * Math.cos(ang);
-	this.pos.z  = 0.95 * this.pos.z + 0.5 * currad * Math.sin(ang);
+		this.pos.x  = 0.95 * this.pos.x + rockConfig.crackOrbitRadius * currad * Math.cos(ang);
+		this.pos.z  = 0.95 * this.pos.z + rockConfig.crackOrbitRadius * currad * Math.sin(ang);
 
-	this.velocity.x = this.pos.x - this.velocity.x;
-	this.velocity.z = this.pos.z - this.velocity.z;
-	this.mesh.position.set( position.x + this.pos.x + this.offset.x, 
-							position.y + this.pos.y + this.offset.y, 
-							position.z + this.pos.z + this.offset.z );
+		this.velocity.x = this.pos.x - this.velocity.x;
+		this.velocity.z = this.pos.z - this.velocity.z;
+		
+		this.mesh.position.set( position.x + this.pos.x, 
+								position.y + this.pos.y, 
+								position.z + this.pos.z );
+	}else if( this.type == 0 ){ //dropping cracks
+
+		//falling down
+		//for big cracks, they should fall at same speed
+		this.speed 		= Math.min( this.speed + rockConfig.gravity, this.maxSpeed );
+		this.velocity.y	-= this.speed;
+
+		this.pos.x 		+= this.velocity.x;
+		this.pos.y 		+= this.velocity.y;
+		this.pos.z 		+= this.velocity.z;
+
+		var currlevel = Math.max( 	rockConfig.terrainLevel, 
+									this.pos.y + this.offset.y );
+		this.mesh.position.set( position.x 	+ this.pos.x + this.offset.x, 
+								currlevel, 
+								position.z 	+ this.pos.z + this.offset.z );
+	
+		if( currlevel > rockConfig.terrainLevel ){
+			//rotation - make dropping ones rotate a little faster than orbiting ones
+			this.rotSpeed		 += (this.rotTarget - this.rotSpeed) * 0.08;
+			this.mesh.rotation.x += scaler * this.rotSpeed * this.rotAxis.x;
+			this.mesh.rotation.y += scaler * this.rotSpeed * this.rotAxis.y;
+			this.mesh.rotation.z += scaler * this.rotSpeed * this.rotAxis.z;
+		}
+
+	}else { //rock cracks that have already dropped down to earth, should do noing
+			//or maybe just set mode to 0 again?
+
+	}
+
 };
 
 RockCore.prototype.update = function( pos, scaler ) {
@@ -382,14 +426,17 @@ function PrepareRockParticle( cnt, scaleMin, scaleMax ){
 	
 	rockParticle 					= new RockParticle();
 	rockParticle.cnt 				= cnt;
+	//TODO: size, normals, colors should be good as constant values,
+	//		remove them from property values
 	var geometry 					= new THREE.BufferGeometry();
 	rockParticle.particleVelocity 	= new Float32Array( cnt * 3 );
 	rockParticle.particlePosition 	= new Float32Array( cnt * 3 );
 	rockParticle.particleMass 		= new Float32Array( cnt * 1 );
 	rockParticle.particleColor 		= new Float32Array( cnt * 3 );
 	rockParticle.particleSize 		= new Float32Array( cnt * 1 );
+	normals 						= new Float32Array( cnt * 3 );
 
-	var color 			= new THREE.Color(0x67535e);
+	var color 			= new THREE.Color(0xffffff); //new THREE.Color(0x67535e);
 	//color.setHSL( 0.908, 0.3, 0.11 );
 	//need to randomize this later
 
@@ -404,13 +451,21 @@ function PrepareRockParticle( cnt, scaleMin, scaleMax ){
 		rockParticle.particlePosition[3*i+2] = 0;
 		//mass, randomize
 		rockParticle.particleMass[i]	= Math.random() * 0.5 + 0.5;
+		
 		//color, random in hsl
-		//color.setHSL( 0.85 + 0.1 * Math.random(), 0.3, 0.11 );
+		color.setHSL( 0.85 + 0.1 * Math.random(), 0.3, 0.11 ); 
+		//TODO: need to come up with a good brown-ish hsl random algorithm
 		rockParticle.particleColor[3*i+0] = color.r;
-		rockParticle.particleColor[255-3*i+1] = color.g;
+		rockParticle.particleColor[3*i+1] = color.g;
 		rockParticle.particleColor[3*i+2] = color.b;
+		
 		//size, randomize
 		rockParticle.particleSize[i]	  = scaleMin + Math.random() * (scaleMax - scaleMin);
+		
+		//normals, randomize 
+		normals[3*i+0]	= Math.random() - 0.5;
+		normals[3*i+1]	= Math.random() - 0.5;
+		normals[3*i+2]	= Math.random() - 0.5;
 	}
 
 	geometry.addAttribute( 'position', 	
@@ -419,6 +474,8 @@ function PrepareRockParticle( cnt, scaleMin, scaleMax ){
 		new THREE.BufferAttribute( rockParticle.particleColor,    3 ) );
 	geometry.addAttribute( 'size', 		
 		new THREE.BufferAttribute( rockParticle.particleSize, 	  1 ) );
+	geometry.addAttribute( 'normal', 		
+		new THREE.BufferAttribute( normals, 	  				  3 ) );
 	geometry.computeBoundingSphere();
 
 	var shader 	 = THREE.ShaderParticle[ "Particle_Env" ];
@@ -464,7 +521,8 @@ function PrepareRockParticle( cnt, scaleMin, scaleMax ){
 	scene.add( rockParticle.particleCloud );
 }
 
-function LoadRockParticle( cnt, max, scaleMin, scaleMax ){
+//deprecated, using point cloud instead
+/*function LoadRockParticle( cnt, max, scaleMin, scaleMax ){
 	//temp meshes - need simpler ones
 	var manager = new THREE.LoadingManager();
 	manager.onProgress = function ( item, loaded, total ) { };
@@ -493,7 +551,7 @@ function LoadRockParticle( cnt, max, scaleMin, scaleMax ){
 			});
 		}, onProgress, onError );
 	}
-}
+}*/
 
 //TODO: need to compile OBJs into json files for fast loading
 function CreateRock( idx, cnt, scale, pos ){
@@ -534,11 +592,12 @@ function CreateRock( idx, cnt, scale, pos ){
 					child.castShadow 	= true;
 				
 					crack.mesh 	 	= child;
+					crack.type 		= (Math.random() < rockConfig.dropPercentage) ? 0 : 1;
 					crack.rotAxis.set( Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5 );
 					crack.rotAxis.normalize();
 					crack.rotTarget = 0.005 + 0.05 * Math.random();
 					crack.rotSpeed	= (1 + 9 * Math.random()) * crack.rotTarget;
-					crack.maxSpeed  = 0.075 + 0.35 * Math.random();
+					crack.maxSpeed  = 0.5 * (0.075 + 0.35 * Math.random());
 					crack.speed 	= 2 * crack.maxSpeed;
 					
 					rock.bound.union(child.geometry.boundingBox);
@@ -579,60 +638,8 @@ function CreateRockGUI(){
 	var gui = new dat.GUI();
 
 	gui.add( rockConfig, 'distThreshold', 0.0, 5000.0 ).onChange( function() {
+		
 	});
-
-
-	/*gui.add( rockConfig, 'uRoughness', 0.0, 1.0 ).onChange( function() {
-		rockMat.uRoughness = rockConfig.uRoughness;
-	});
-
-	gui.add( rockConfig, 'uMetallic', 0.0, 1.0 ).onChange( function() {
-		rockMat.uMetallic = rockConfig.uMetallic;
-	});
-
-	gui.add( rockConfig, 'uSpecular', 0.0, 1.0 ).onChange( function() {
-		rockMat.uSpecular = rockConfig.uSpecular;
-	});
-
-	gui.add( rockConfig, 'uDetails', 0.0, 1.0 ).onChange( function() {
-		rockMat.uDetails = rockConfig.uDetails;
-	});
-
-	gui.add( rockConfig, 'uExposure', 0.0, 10.0 ).onChange( function() {
-		rockMat.uExposure = rockConfig.uExposure;
-	});
-
-	gui.add( rockConfig, 'uGamma', 1.0, 3.0 ).onChange( function() {
-		rockMat.uGamma = rockConfig.uGamma;
-	});
-
-	/*gui.add( rockConfig, 'uBaseColor' ).onChange( function() {
-		rockMat.uBaseColor = rockConfig.uBaseColor;
-	});*/
-
-	/*gui.add( rockConfig, 'uLightPositions[0]' ).onChange( function() {
-		rockMat.uLightPositions[0] = rockConfig.uLightPositions[0];
-	});
-
-	gui.add( rockConfig, 'uLightPositions[1]' ).onChange( function() {
-		rockMat.uLightPositions[1] = rockConfig.uLightPositions[1];
-	});
-
-	gui.add( rockConfig, 'uLightColors[0]' ).onChange( function() {
-		rockMat.uLightColors[0] = rockConfig.uLightColors[0];
-	});
-
-	gui.add( rockConfig, 'uLightColors[1]' ).onChange( function() {
-		rockMat.uLightColors[1] = rockConfig.uLightColors[1];
-	});*/
-
-	/*gui.add( rockConfig, 'uLightRadiuses[0]', 0.0, 100.0 ).onChange( function() {
-		rockMat.uLightRadiuses[0] = rockConfig.uLightRadiuses0;
-	});
-
-	gui.add( rockConfig, 'uLightRadiuses[1]', 0.0, 100.0 ).onChange( function() {
-		rockMat.uLightRadiuses[1] = rockConfig.uLightRadiuses1;
-	});*/
 	gui.close();
 
 	return gui;
