@@ -8,18 +8,7 @@ var rockConfig = {
 		distThreshold 	: 800,
 		rockParticleCnt	: 5000,
 		terrainLevel	: -400
-		/*uRoughness : 1.0,
-		uMetallic  : 0.2,
-		uSpecular  : 0.1,
-		uDetails   : 1.0,
-		uExposure  : 6.3375,
-		uGamma	   : 2.2,
-		uBaseColor : new THREE.Color( 0x413e3c ),
-		uLightPositions : [ new THREE.Vector3( 0, 300, 0 ), new THREE.Vector3( 200, 0, 200 ) ],
-		uLightRadiuses0 : 5.0,
-		uLightRadiuses1 : 5.0,
-		uLightColors 	: [ new THREE.Vector3( 189, 137, 96 ), new THREE.Vector3( 201, 171, 114 ) ]*/
-	};
+};
 
 function RockAssemble () {
 	this.core  		= null; //core rock reference
@@ -46,16 +35,6 @@ function RockParticle(){
 	this.particleColor 	  = [];
 	this.particleSize 	  = [];
 }
-
-/*function RockParticle () {
-	this.size 		= 1.0;
-	this.dead 		= false;
-	this.droprate 	= 0.008 + 0.012 * Math.random();
-	this.velocity	= new THREE.Vector3(0,0,0);
-	this.position 	= new THREE.Vector3(0,0,0);
-	var m 			= 0.2 + 0.4 * Math.random();
-	this.mass 		= new THREE.Vector3( 0, - 15.0/m, 0 ); 
-}*/
 
 function RockCrack () {
    	this.idx 		= 0;
@@ -116,7 +95,7 @@ RockAssemble.prototype.cast = function( raycaster ) {
 	var pos  = intersects[0].point;
 	var dist = new THREE.Vector3;
 	var cnt  = 35;
-	//this.scaler    = 0.01;
+	
 	this.target    = 0.0;
 	this.speed     = 0.3;
 	this.breakPer += 0.45;
@@ -216,9 +195,9 @@ RockParticle.prototype.drop   = function( point, center, cnt ) {
 	axis.normalize();
 
 	for( var i = 0; i < cnt; i++ ){
-		this.particlePosition[3*idx+0] = point.x;
-		this.particlePosition[3*idx+1] = point.y;
-		this.particlePosition[3*idx+2] = point.z;
+		this.particlePosition[3*idx+0] = point.x + 25 * ran.x;
+		this.particlePosition[3*idx+1] = point.y + 25 * ran.y;
+		this.particlePosition[3*idx+2] = point.z + 25 * ran.z;
 
 		ran.x 	= vel.x; ran.y 	= vel.y; ran.z 	= vel.z;
 		axis.x 	= Math.random()-0.5;
@@ -228,9 +207,9 @@ RockParticle.prototype.drop   = function( point, center, cnt ) {
 		axis.normalize();
 		ran.applyAxisAngle (axis, Math.random() * Math.PI / 6 );
 		
-		this.particleVelocity[3*idx+0] = ran.x * 0.5; 
+		this.particleVelocity[3*idx+0] = ran.x * 0.3; 
 		this.particleVelocity[3*idx+1] = ran.y * 0.5; 
-		this.particleVelocity[3*idx+2] = ran.z * 0.5; 
+		this.particleVelocity[3*idx+2] = ran.z * 0.3; 
 
 		for( ; idx < this.cnt; idx++ ){
 			if( this.particlePosition[3*idx+1] <= rockConfig.terrainLevel ){
@@ -307,7 +286,6 @@ function LoadLightMat( texDiffuse, texNormal ){
 					   shading: 		THREE.SmoothShading };
 	rockMat = new THREE.ShaderMaterial( parameters );
 
-
 	var shadermono 	 = THREE.ShaderPBR[ "PBR_Color" ];
 	var uniformsmono = THREE.UniformsUtils.clone( shadermono.uniforms );
 
@@ -371,10 +349,8 @@ function LoadEnvCubeMat( texDiffuse, texNormal ){
 					   lights: 			false, //temporarily disable lights - tests for performance 
 					   fog: 			true,
 					   morphTargets:    false,
-					   morphNormals:    false,
-					   shading: 		THREE.SmoothShading };
+					   morphNormals:    false };
 	rockMat = new THREE.ShaderMaterial( parameters );
-
 
 	var shadermono 	 = THREE.ShaderPBR[ "PBR_Env" ];
 	var uniformsmono = THREE.UniformsUtils.clone( shadermono.uniforms );
@@ -394,8 +370,7 @@ function LoadEnvCubeMat( texDiffuse, texNormal ){
 						   lights: 			false, 
 					       fog: 			true,
 					       morphTargets:    false,
-					       morphNormals:    false,
-					       shading: 		THREE.SmoothShading };
+					       morphNormals:    false };
 	coreMat = new THREE.ShaderMaterial( parametersmono );
 
 	return rockMat;
@@ -440,18 +415,52 @@ function PrepareRockParticle( cnt, scaleMin, scaleMax ){
 
 	geometry.addAttribute( 'position', 	
 		new THREE.BufferAttribute( rockParticle.particlePosition, 3 ) );
-	geometry.addAttribute( 'color', 	
+	geometry.addAttribute( 'pcolor', 	
 		new THREE.BufferAttribute( rockParticle.particleColor,    3 ) );
 	geometry.addAttribute( 'size', 		
 		new THREE.BufferAttribute( rockParticle.particleSize, 	  1 ) );
 	geometry.computeBoundingSphere();
 
-	var material  = new THREE.PointCloudMaterial( 
-		{ size: (scaleMin + Math.random() * (scaleMax - scaleMin)), vertexColors: THREE.VertexColors } ); 
-		//need to make a customized shader for different sizes
+	var shader 	 = THREE.ShaderParticle[ "Particle_Env" ];
+	var uniforms = THREE.UniformsUtils.clone( shader.uniforms );
+
+	var path = "textures/envmap/";
+	var format = '.png';
+	var urls = [
+		path + 'px' + format, path + 'nx' + format,
+		path + 'py' + format, path + 'ny' + format,
+		path + 'pz' + format, path + 'nz' + format
+	];
+	var textureCube = THREE.ImageUtils.loadTextureCube( urls, new THREE.CubeRefractionMapping() );
+	//uniforms[ "uCubeMapTex" ].value 	= textureCube;
+
+	uniforms[ "uBaseColorMap" ].value 	= THREE.ImageUtils.loadTexture( "textures/rock_particle.png" );
+	//uniforms[ "uRoughness" ].value    	= 0.8;	
+	//uniforms[ "uMetallic"  ].value    	= 0.3;	
+	//uniforms[ "uSpecular"  ].value    	= 0.3;	
+			
+	//uniforms[ "uExposure"  ].value    	= 6.3375;
+	uniforms[ "uGamma" 	   ].value    	= 2.2;
+	
+	var attributes = {
+		size:  { type: 'f', value: [] },
+		pcolor: { type: 'c', value: [] }
+	};
+
+	var parameters = { fragmentShader: 	shader.fragmentShader, 
+					   vertexShader: 	shader.vertexShader, 
+					   uniforms: 		uniforms,
+					   attributes: 		attributes,
+					   fog: 			true,
+					   blending: 		THREE.AlphaBlending,
+					   depthWrite: 		false,
+					   transparent: 	true };
+	var material = new THREE.ShaderMaterial( parameters );
 
 	rockParticle.particleCloud = new THREE.PointCloud( geometry, material );
 	rockParticle.particleCloud.visible = false;
+	rockParticle.particleCloud.dynamic = true;
+
 	scene.add( rockParticle.particleCloud );
 }
 

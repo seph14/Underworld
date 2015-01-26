@@ -688,7 +688,6 @@ THREE.ShaderPBR = {
 				"uCubeMapTex" 	: {type: "t",  value: null},
 				"uBaseColor" 	: {type: "c",  value: new THREE.Color( 0xffffff )},
 
-				"uBaseColor" 	 : {type: "c",  value: new THREE.Color( 0xffffff )},
 				"uRoughness" 	 : {type: "f",  value: 0},
 				"uRoughness4" 	 : {type: "f",  value: 0},
 				"uMetallic" 	 : {type: "f",  value: 0},
@@ -715,12 +714,9 @@ THREE.ShaderPBR = {
 			"uniform float	uExposure;",
 			"uniform float	uGamma;",
 
-			//"varying vec3 vNormal;",
-			//"varying vec3 vPosition;",
 			"varying vec3 vEyePosition;",
 			"varying vec3 vWsNormal;",
-			//"varying vec3 vWsPosition;",
-
+			
 			THREE.ShaderChunk[ "shadowmap_pars_fragment" ],
 			THREE.ShaderChunk[ "fog_pars_fragment" ],
 			
@@ -807,11 +803,8 @@ THREE.ShaderPBR = {
 
 		vertexShader: [
 
-			//"varying vec3		vNormal;",
-			//"varying vec3		vPosition;",
 			"varying vec3		vWsNormal;",
 			"varying vec3		vEyePosition;",
-			//"varying vec3		vWsPosition;",
 			
 			THREE.ShaderChunk[ "shadowmap_pars_vertex" ],
 
@@ -820,12 +813,7 @@ THREE.ShaderPBR = {
 			    "vec4 worldPosition		= modelMatrix * vec4(position,1.0);;",
     			"vec4 viewSpacePosition	= viewMatrix * worldPosition;",
 	
-    			//"vNormal 				= normalize( normalMatrix * normal );",
-				//"vPosition				= viewSpacePosition.xyz;",
 				"vec3 vWsPosition		= worldPosition.xyz;",
-	
-				//"vec4 eyeDirViewSpace	= viewSpacePosition - vec4( 0, 0, 0, 1 );",
-				//"vEyePosition			= -vec3( viewMatrixInverse * eyeDirViewSpace );",
 				"vEyePosition			= - vWsPosition.xyz;", //wrong math??
 				"vWsNormal				= vec3( modelMatrix * vec4( normal, 0.0 ) );",
 	
@@ -854,7 +842,7 @@ THREE.ShaderPBR = {
 		uniforms: THREE.UniformsUtils.merge( [
 
 			THREE.UniformsLib[ "fog" ],
-			THREE.UniformsLib[ "lights" ],
+			//THREE.UniformsLib[ "lights" ],
 			THREE.UniformsLib[ "shadowmap" ],
 
 			{
@@ -900,32 +888,6 @@ THREE.ShaderPBR = {
 			"varying vec2 vTexCoord;",
 			"varying vec3 vEyePosition;",
 			"varying vec3 vWsNormal;",
-			//"varying vec3 vWsPosition;",
-
-			"uniform vec3 ambientLightColor;",
-
-			"#if MAX_DIR_LIGHTS > 0",
-
-				"uniform vec3 directionalLightColor[ MAX_DIR_LIGHTS ];",
-				"uniform vec3 directionalLightDirection[ MAX_DIR_LIGHTS ];",
-
-			"#endif",
-
-			"#if MAX_HEMI_LIGHTS > 0",
-
-				"uniform vec3 hemisphereLightSkyColor[ MAX_HEMI_LIGHTS ];",
-				"uniform vec3 hemisphereLightGroundColor[ MAX_HEMI_LIGHTS ];",
-				"uniform vec3 hemisphereLightDirection[ MAX_HEMI_LIGHTS ];",
-
-			"#endif",
-
-			"#if MAX_POINT_LIGHTS > 0",
-
-				"uniform vec3 pointLightColor[ MAX_POINT_LIGHTS ];",
-				"uniform vec3 pointLightPosition[ MAX_POINT_LIGHTS ];",
-				"uniform float pointLightDistance[ MAX_POINT_LIGHTS ];",
-
-			"#endif",
 
 			THREE.ShaderChunk[ "shadowmap_pars_fragment" ],
 			THREE.ShaderChunk[ "fog_pars_fragment" ],
@@ -1004,7 +966,7 @@ THREE.ShaderPBR = {
 
 			// From "I'm doing it wrong"
 			// http://imdoingitwrong.wordpress.com/2011/01/31/light-attenuation/
-			"float getAttenuation( vec3 lightPosition, vec3 vertexPosition, float lightRadius )",
+			/*"float getAttenuation( vec3 lightPosition, vec3 vertexPosition, float lightRadius )",
 			"{",
 				"float r			= lightRadius;",
 				"vec3 L				= lightPosition - vertexPosition;",
@@ -1018,7 +980,7 @@ THREE.ShaderPBR = {
 				"attenuation		= max(attenuation, 0.0);",
 	
 				"return attenuation;",
-			"}",
+			"}",*/
 
 			// Normal Blending (Unity normal blending)
 			// Source adapted from http://blog.selfshadow.com/publications/blending-in-detail/
@@ -1121,7 +1083,6 @@ THREE.ShaderPBR = {
 			"varying vec3	vPosition;",
 			"varying vec3	vWsNormal;",
 			"varying vec3	vEyePosition;",
-			//"varying vec3	vWsPosition;",
 			"varying vec2	vTexCoord;",
 			
 			THREE.ShaderChunk[ "shadowmap_pars_vertex" ],
@@ -1136,8 +1097,6 @@ THREE.ShaderPBR = {
 				"vec3 vWsPosition		= worldPosition.xyz;",
 				"vTexCoord				= uv;",
 	
-				//"vec4 eyeDirViewSpace	= viewSpacePosition - vec4( 0, 0, 0, 1 );",
-				//"vEyePosition			= -vec3( viewMatrixInverse * eyeDirViewSpace );",
 				"vEyePosition			= - vWsPosition.xyz;", //wrong math??
 				"vWsNormal				= vec3( modelMatrix * vec4( normal, 0.0 ) );",
 	
