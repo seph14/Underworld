@@ -62,7 +62,8 @@ function onUpdate() {
 		 break;
 	}
 
-	$('.pie_progress').asPieProgress('go',layer01.pushValue*100);
+	if(Math.random()<.1)
+		$('.pie_progress').asPieProgress('go',layer01.pushValue*100);
 
 }
 

@@ -1,0 +1,275 @@
+/**
+ COMPASS
+*/
+@import url(http://fonts.googleapis.com/css?family=Open+Sans:600,800);
+/**
+ * -> http://hugogiraudel.com/2013/08/05/offsets-sass-mixin/
+ * Private method
+ * Can be called but it's not the point
+ */
+/**
+ * Mixin triplet calling the private mixin
+ * with the appropriate position value
+ */
+/* line 53, ../src/scss/jefr/helpers/_mixins.scss */
+.el {
+  /**
+   * left   :  will be applied (10px)
+   * right  : won't be applied (not numeric)
+   * left   :  will be applied (1em)
+   * bottom : won't be applied (no value)
+   */
+  top: 1em;
+  left: 10px;
+  position: absolute;
+  background: deepskyblue;
+  height: 10em;
+  width: 10em;
+}
+
+/* http://hugogiraudel.com/2013/03/18/ultimate-rem-mixin/ */
+/* Margin & Pagging fuer Anchor */
+/* Vertikales Zentrieren */
+/* NAMESPACE */
+/*
+SCSS variables are information about icon's compiled state, stored under its original file name
+
+.icon-home {
+  width: $icon-home-width;
+}
+
+The large array-like variables contain all information about a single icon
+$icon-home: x y offset_x offset_y width height total_width total_height image_path;
+*/
+/*
+The provided mixins are intended to be used with the array-like variables
+
+.icon-home {
+  @include sprite-width($icon-home);
+}
+
+.icon-email {
+  @include sprite($icon-email);
+}
+*/
+/* Eric Meyer's Reset CSS v2.0 - http://cssreset.com */
+/* line 2, ../src/scss/base/_reset.scss */
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+  margin: 0;
+  padding: 0;
+}
+
+/* line 2, ../src/scss/base/_reset.scss */
+article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {
+  display: block;
+}
+
+/* line 2, ../src/scss/base/_reset.scss */
+body {
+  line-height: 1;
+}
+
+/* line 2, ../src/scss/base/_reset.scss */
+ol, ul {
+  list-style: none;
+}
+
+/* line 2, ../src/scss/base/_reset.scss */
+blockquote, q {
+  quotes: none;
+}
+
+/* line 2, ../src/scss/base/_reset.scss */
+blockquote:before, blockquote:after, q:before, q:after {
+  content: none;
+}
+
+/* line 2, ../src/scss/base/_reset.scss */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* line 1, ../src/scss/base/_base.scss */
+html {
+  height: 100%;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+}
+
+/* line 9, ../src/scss/base/_base.scss */
+img, embed, object, video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* line 14, ../src/scss/base/_base.scss */
+ul, ol {
+  list-style: none;
+}
+
+/* line 18, ../src/scss/base/_base.scss */
+.hide {
+  display: none;
+}
+
+/* line 22, ../src/scss/base/_base.scss */
+.show {
+  display: block;
+}
+
+/* line 2, ../src/scss/base/_typography.scss */
+h2, h3, a#escape, a#open-map-from-gallery {
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 800;
+}
+
+/* line 7, ../src/scss/base/_typography.scss */
+#gallery h3, p, a#open-about {
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 600;
+}
+
+/* line 12, ../src/scss/base/_typography.scss */
+html {
+  font-family: 'Open Sans', sans-serif;
+}
+
+/* line 22, ../src/scss/base/_typography.scss */
+h1, h2, h3, h4, h5, p, a, li, ol, ul, i, span, pre, div, input, select {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-style: normal;
+}
+
+/* line 32, ../src/scss/base/_typography.scss */
+h2 {
+  font-size: 13.75px;
+  font-size: 1.375rem;
+  line-height: 1.13636;
+  color: #6e746e;
+  text-transform: uppercase;
+}
+/* line 38, ../src/scss/base/_typography.scss */
+#gallery h2 {
+  font-size: 9.375px;
+  font-size: 0.9375rem;
+  line-height: 1.2;
+  color: #3aaa35;
+}
+
+/* line 44, ../src/scss/base/_typography.scss */
+h3 {
+  font-size: 8.125px;
+  font-size: 0.8125rem;
+  line-height: 1.23077;
+  color: #6e746e;
+  text-transform: uppercase;
+}
+/* line 49, ../src/scss/base/_typography.scss */
+#gallery h3 {
+  font-size: 9.375px;
+  font-size: 0.9375rem;
+  line-height: 1.2;
+  text-transform: none;
+}
+/* line 54, ../src/scss/base/_typography.scss */
+.about h3 {
+  font-size: 6.875px;
+  font-size: 0.6875rem;
+  line-height: 1.63636;
+  text-align: left;
+}
+
+/* line 61, ../src/scss/base/_typography.scss */
+p {
+  font-size: 8.75px;
+  font-size: 0.875rem;
+  line-height: 1.42857;
+  color: #6e746e;
+}
+/* line 65, ../src/scss/base/_typography.scss */
+.about p {
+  font-size: 6.25px;
+  font-size: 0.625rem;
+  line-height: 1.6;
+}
+
+/* line 70, ../src/scss/base/_typography.scss */
+a#escape, a#open-map-from-gallery {
+  text-transform: uppercase;
+}
+
+/* line 75, ../src/scss/base/_typography.scss */
+a#escape {
+  color: #fffeff;
+  font-size: 9.375px;
+  font-size: 0.9375rem;
+  line-height: 1.2;
+}
+/* line 78, ../src/scss/base/_typography.scss */
+a#escape:active {
+  color: #2d53b3;
+}
+
+/* line 84, ../src/scss/base/_typography.scss */
+a#open-map-from-gallery {
+  color: #fffeff;
+  font-size: 9.375px;
+  font-size: 0.9375rem;
+  line-height: 1.2;
+}
+
+/* line 89, ../src/scss/base/_typography.scss */
+a#open-about {
+  font-size: 6.25px;
+  font-size: 0.625rem;
+  line-height: 1.8;
+  color: #6e746e;
+  text-transform: uppercase;
+}
+
+/* line 1, ../src/scss/modules/_home.scss */
+#logo {
+  background-image: url(img/spritesheet.png);
+  background-position: 0px 0px;
+  width: 119px;
+  background-size: 261px 1629px;
+  height: 13px;
+  position: absolute;
+  position: absolute;
+  top: 50px;
+  left: 50px;
+  margin: 0px;
+  padding: 0px;
+}
+
+/* line 13, ../src/scss/modules/_home.scss */
+#social {
+  background-image: url(img/spritesheet.png);
+  background-position: 0px -37px;
+  width: 149px;
+  background-size: 261px 1629px;
+  height: 27px;
+  position: absolute;
+  top: 50px;
+  right: 50px;
+  margin: 0px;
+  padding: 0px;
+}
+
+/* line 24, ../src/scss/modules/_home.scss */
+#preloader {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -75px;
+  margin-top: -75px;
+}
+
+/*# sourceMappingURL=styles.css.map */

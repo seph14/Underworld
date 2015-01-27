@@ -1,0 +1,182 @@
+
+@mixin clear {
+  &:after{
+    content:"";
+    display:table;
+    clear:both;
+  }
+}
+
+%clearfix {
+  @include clear;
+}
+
+@function parseInt($n) {
+  @return $n / ($n * 0 + 1);
+}
+
+/**
+ * -> http://hugogiraudel.com/2013/08/05/offsets-sass-mixin/
+ * Private method
+ * Can be called but it's not the point
+ */
+@mixin _position($position, $args) {
+
+  @each $o in top right bottom left {
+    $i: index($args, $o);
+    @if $i
+    and $i + 1 <= length($args)
+    and type-of( nth($args, $i + 1) ) == number {
+      #{$o}: nth($args, $i + 1);
+    }
+  }
+
+  position: $position;
+}
+
+/**
+ * Mixin triplet calling the private mixin
+ * with the appropriate position value
+ */
+@mixin absolute($args) {
+  @include _position(absolute, $args);
+}
+
+@mixin relative($args) {
+  @include _position(relative, $args);
+}
+
+@mixin    fixed($args) {
+  @include _position(fixed,    $args);
+}
+
+.el {
+  /**
+   * left   :  will be applied (10px)
+   * right  : won't be applied (not numeric)
+   * left   :  will be applied (1em)
+   * bottom : won't be applied (no value)
+   */
+  @include absolute(left 10px right aerr top 1em bottom);
+
+  background: deepskyblue;
+  height: 10em;
+  width: 10em;
+}
+
+/* http://hugogiraudel.com/2013/03/18/ultimate-rem-mixin/ */
+
+@mixin rem($property, $values) {
+  $px : ();
+  $rem: ();
+
+  @each $value in $values {
+
+    @if $value == 0 or $value == auto {
+      $px : append($px , $value);
+      $rem: append($rem, $value);
+    }
+
+    @else {
+      $unit: unit($value);
+      $val: parseInt($value);
+
+      @if $unit == "px" {
+        $px : append($px,  $value);
+        $rem: append($rem, ($val / 10 + rem));
+      }
+
+      @if $unit == "rem" {
+        $px : append($px,  ($val * 10 + px));
+        $rem: append($rem, $value);
+      }
+    }
+  }
+
+  @if $px == $rem {
+    #{$property}: $px;
+  } @else {
+    #{$property}: $px;
+    #{$property}: $rem;
+  }
+}
+
+@mixin font-size($font-size, $line-height: "") {
+
+  $font-size : $font-size * 0.625;
+  $line-height : $line-height * 0.625;
+
+  @include rem(font-size, $font-size * 1px);
+
+  @if $line-height == "" {
+    line-height: ceil($font-size / $line-height-fallback) * ($line-height-fallback / $font-size);
+  } @else {
+    line-height: $line-height / $font-size;
+  }
+
+}
+/* Margin & Pagging fuer Anchor */
+
+@mixin offset-for-anchor( $offset ){
+  /* anchor offset */
+  margin-top: - $offset * 1px;
+  padding-top: $offset * 1px;
+}
+
+/* Vertikales Zentrieren */
+
+%vertical-align {
+  position: relative;
+  top: 50%;
+  @include translateY(-50%);
+}
+
+@mixin vertical-align {
+  position: relative;
+  top: 50%;
+  @include translateY(-50%);
+}
+
+@mixin transOpacityDelay( $duration, $delay){
+  @include transition(opacity $duration ease-out $delay);
+}
+
+/* NAMESPACE */
+
+@mixin hideInState( $states... ){
+  @each $state in $states {
+    .#{$state} & {
+      display: none;
+    }
+  }
+}
+
+@mixin showInState( $states...){
+  @each $state in $states {
+    .#{$state} & {
+      display: block;
+    }
+  }
+}
+
+%hide-text {
+  text-indent: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+@mixin keyframes( $animationName )
+{
+  @-webkit-keyframes $animationName {
+    @content;
+  }
+  @-moz-keyframes $animationName {
+    @content;
+  }
+  @-o-keyframes $animationName {
+    @content;
+  }
+  @keyframes $animationName {
+    @content;
+  }
+}

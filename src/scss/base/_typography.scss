@@ -1,0 +1,94 @@
+
+%font-bold {
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 800;
+}
+
+%font-medium {
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 600;
+}
+
+html {
+  font-family: 'Open Sans', sans-serif;
+}
+
+body {
+
+}
+
+// HEADINGS
+
+h1, h2, h3, h4, h5, p, a, li, ol, ul, i, span, pre, div, input, select {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-style: normal;
+}
+
+h1 {
+
+}
+
+h2 {
+  @extend %font-bold;
+  @include font-size(22, 25);
+  color: $color-grey;
+  text-transform: uppercase;
+
+  #gallery & {
+    @include font-size(15, 18);
+    color: $color-green;
+  }
+}
+
+h3 {
+  @extend %font-bold;
+  @include font-size(13, 16);
+  color: $color-grey;
+  text-transform: uppercase;
+  #gallery & {
+    @include font-size(15, 18);
+    @extend %font-medium;
+    text-transform: none;
+  }
+  .about &{
+    @include font-size(11, 18);
+    text-align: left;
+
+  }
+}
+
+p {
+  @extend %font-medium;
+  @include font-size(14, 20);
+  color: $color-grey;
+  .about &{
+    @include font-size(10, 16);
+  }
+}
+
+a#escape, a#open-map-from-gallery {
+  @extend %font-bold;
+
+  text-transform: uppercase;
+}
+a#escape {
+  color: $color-white;
+  @include font-size(15,18);
+  &:active{
+  color: $color-blue;
+
+  }
+}
+
+a#open-map-from-gallery{
+  color: $color-white;
+  @include font-size(15,18);
+}
+
+a#open-about{
+  @extend %font-medium;
+  @include font-size(10,18);
+  color: $color-grey;
+  text-transform: uppercase;
+}

@@ -1,0 +1,20 @@
+
+
+$font-size-base-html-px: 15;
+$line-height-base: 26;
+$line-height-fallback: 1;
+
+$color-white: #fffeff;
+$color-black: #000000;
+$color-grey: #6e746e;
+$color-green: #3aaa35;
+$color-blue: #2D53B3;
+
+
+$base-margin: 5rem;
+$base-margin-body: 1.5rem;
+
+$state-prefix: state--;
+$STATE_HOME: #{$state-prefix}home;
+$STATE_GALLERY: #{$state-prefix}gallery;
+

@@ -1,0 +1,30 @@
+#logo{
+    //display: inline-block;
+    @include sprite($logo);
+    //@include sprite-center($logo);
+    position: absolute;
+    position: absolute;
+    top:50px;
+    left:50px;
+    margin: 0px;
+    padding: 0px;
+ }
+
+#social{
+    //display: inline-block;
+    @include sprite($social);
+    //@include sprite-center($social);
+    position: absolute;
+    top:50px;
+    right:50px;
+    margin: 0px;
+    padding: 0px;
+ }
+
+#preloader {
+	position: absolute;
+	top:50%;
+	left:50%;
+	margin-left: -75px;
+	margin-top: -75px;
+}

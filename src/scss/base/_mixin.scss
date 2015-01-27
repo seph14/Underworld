@@ -1,0 +1,29 @@
+@mixin sprite-width($sprite) {
+  width: strip-unit(nth($sprite, 5)) / 1 * 1px;
+  background-size: 261px 1629px;
+}
+
+@mixin sprite-height($sprite) {
+  height: strip-unit(nth($sprite, 6)) / 1 * 1px;
+}
+
+@mixin sprite-position($sprite) {
+  $sprite-offset-x: strip-unit(nth($sprite, 3)) / 1 * 1px;
+  $sprite-offset-y: strip-unit(nth($sprite, 4)) / 1 * 1px;
+  background-position: $sprite-offset-x  $sprite-offset-y;
+}
+
+@mixin sprite-image($sprite) {
+  $sprite-image: nth($sprite, 9);
+  background-image: url(#{$sprite-image});
+}
+
+@mixin sprite-center($sprite){
+  $width: strip-unit(nth($sprite, 5));
+  $height: strip-unit(nth($sprite, 6));
+
+  top: 50%;
+  left: 50%;
+  margin-left: - ($width/2 * 1px);
+  margin-top: - ($height/2 * 1px);
+}
