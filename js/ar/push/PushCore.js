@@ -3,21 +3,22 @@
  */
 var pushCore;
 
-var PushMode = {idle:0,push:1,pull:2};
+var PushMode = {awake:-1,idle:0,push:1,pull:2};
 
-var PushCore = function (renderCallback) {
+var PushCore = function () {
 
 	console.log("PushCore.constructor");
 
 	pushCore = this;
 
-	this.renderCallback = renderCallback;
+	this.onUpdate = null;
 
 	this.pushComponents = [];
 
-	this.currTime 	= new Date().getTime();
-	this.lastTime 	= this.currTime;
-	this.deltaTime 	= 0;
+	this.currTimeMS 	= new Date().getTime();
+	this.lastTimeMS 	= this.currTimeMS;
+	this.deltaTimeMS 	= 0.02;
+	pushCore.deltaTime 	= 0.02;
 
 	this.console 	= document.getElementById("console");
 	
@@ -32,29 +33,39 @@ var PushCore = function (renderCallback) {
 
 */
 
+Math.easeInOutExpo = function (t, b, c, d) {
+	t /= d/2;
+	if (t < 1) return c/2 * Math.pow( 2, 10 * (t - 1) ) + b;
+	t--;
+	return c/2 * ( -Math.pow( 2, -10 * t) + 2 ) + b;
+};
+
+PushCore.prototype.btnClick = function(btnID) {
+
+	if(pushCore.onBtnClick!=null)	pushCore.onBtnClick(btnID);
+
+}
+
+PushCore.prototype.deltaTime = 0.02;
 PushCore.prototype.update = function() {
 	//console.log("PushCore.render");
 
-	this.currTime 	= new Date().getTime();
-	this.deltaTime 	= this.currTime-this.lastTime;
-	this.lastTime 	= this.currTime;
+	this.currTimeMS 	= new Date().getTime();
+	this.deltaTimeMS 	= this.currTimeMS-this.lastTimeMS;
+	this.lastTimeMS 	= this.currTimeMS;
+
+	pushCore.deltaTime	= this.deltaTimeMS/1000;
+	pushCore.fps		= Math.round(1000/this.deltaTimeMS);
+	//console.log("pushCore.deltaTime."+pushCore.deltaTime);
 
 	for(var i=0; i<pushCore.pushComponents.length; i++) {
 		pushCore.pushComponents[i].update();
 	}
 
-	document.getElementById("console").innerHTML = Math.round(1000/this.deltaTime);
-
-	pushCore.renderCallback();
+	if(pushCore.onUpdate!=null)	pushCore.onUpdate();
 
 	requestAnimFrame(pushCore.update);
 
-}
-
-PushCore.prototype.setContent = function() {
-	for(var i=0; i<pushCore.pushComponents.length; i++) {
-		pushCore.pushComponents[i].push();
-	}
 }
 
 PushCore.prototype.addComponent = function(object) {
