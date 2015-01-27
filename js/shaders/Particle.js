@@ -54,7 +54,7 @@ THREE.ShaderParticle = {
 
 			//"varying vec3 vEyePosition;",
 			"varying vec3 vColor;",
-			"varying vec3 vNormal;",
+			//"varying vec3 vNormal;",
 
 			//THREE.ShaderChunk[ "shadowmap_pars_fragment" ],
 			THREE.ShaderChunk[ "fog_pars_fragment" ],
@@ -102,7 +102,7 @@ THREE.ShaderParticle = {
 				//"vec3 V                  = normalize( vEyePosition );",
 			
 				//"vec3 baseColor			= texture2D( uBaseColorMap, gl_PointCoord ).rgb * vColor;",
-				"vec4 texColor 				= texture2D( uBaseColorMap, gl_PointCoord );"
+				"vec4 texColor 				= texture2D( uBaseColorMap, gl_PointCoord );",
 				"float alpha 				= texColor.a;",
 				"vec3 color					= texColor.rgb * vColor;",
 				
@@ -144,7 +144,7 @@ THREE.ShaderParticle = {
 
 			//"varying vec3 		vEyePosition;",
 			"varying vec3 		vColor;",
-			"varying vec3 		vNormal",
+			//"varying vec3 		vNormal",
 
 			"attribute float    size;",
 			"attribute vec3 	pcolor;",
@@ -155,7 +155,7 @@ THREE.ShaderParticle = {
 
 			    "vec4 worldPosition		= modelMatrix * vec4(position,1.0);;",
     			"vec4 viewSpacePosition	= viewMatrix * worldPosition;",
-				"vNormal 				= normalize( normalMatrix * normal );",
+				"vec3 vNormal 			= normalize( normalMatrix * normal );",
 				
 				//"vEyePosition			= - worldPosition.xyz;", //wrong math??
 				"gl_PointSize 			= size * ( 600.0 / length( viewSpacePosition.xyz ) );",

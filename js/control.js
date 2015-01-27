@@ -206,7 +206,7 @@ function initScene() {
 		LoadTerrainMatEnvMap();
 	}
 	
-	PrepareRockParticle( 5000, 0.25, 0.45 );
+	PrepareRockParticle( 5000, 0.15, 0.35 );
 
 	LoadTerrain();
 	LoadDummy();
@@ -300,8 +300,6 @@ function render() {
 	//cameraCube.rotation.copy( camera.rotation );
 
 	cameraControl.update();
-
-
 
 	for( var i  = rocks.length-1; i >= 0; i-- ){
 		rocks[i].update();

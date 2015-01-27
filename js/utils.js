@@ -14,3 +14,9 @@ Array.prototype.remove = function(from, to) {
   this.length = from < 0 ? this.length + from : from;
   return this.push.apply(this, rest);
 };
+
+//helper function for rock physics calculation
+//if number is bigger than 0 return 1, else return -1
+function toUnit( number ){
+	return (number > 0.0) ? 1.0 : -1.0;
+}
