@@ -282,6 +282,7 @@ function onDocumentMouseDown( event ){
 		
 	var vector 		= new THREE.Vector3( mousex, mousey, 0.5 ).unproject( camera );
 	var raycaster 	= new THREE.Raycaster( camera.position, vector.sub( camera.position ).normalize() );
+	trace( raycaster );
 	for( var i  = rocks.length-1; i >= 0; i-- ){
 		if( rocks[i].cast( raycaster ) ) break;
 	}
@@ -361,7 +362,7 @@ function render() {
 	//renderer.render( scene, cameraTwo);
 
 	//renderer.clearTarget( null, 1, 1, 1 );
-	camera = cameraControl.currentCamera;
+	//camera = cameraControl.currentCamera;
 	//composer.render( 0.1 );
 }
 
