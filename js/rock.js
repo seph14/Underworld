@@ -23,8 +23,9 @@ var rockConfig = {
 		//maximum speed on every axis
 		tickThreshold		: 210,
 		//first 2s let the collision only dropping cracks move away from monolite
-		minMoveThreshold	: 0.1
+		minMoveThreshold	: 0.5,
 		//minimum move threshold for physics detection, if smaller than this, set the crack be static
+		particleDroprate	: 10
 };
 
 function RockAssemble () {
@@ -124,7 +125,7 @@ RockAssemble.prototype.cast = function( raycaster ) {
 	
 	this.target    = 0.0;
 	this.speed     = 0.3;
-	this.breakPer += 0.45;
+	this.breakPer += 0.25;
 
 	for( var i = (this.crack.length-1); i >= 0; i-- ){
 		if( this.crack[i].mode >= 1.0 ) continue;
@@ -139,10 +140,9 @@ RockAssemble.prototype.cast = function( raycaster ) {
 	}
 
 	if( (this.breakPer > 1.0)  || 
-		( (this.breakPer > 0.5) && (Math.random() < 0.3 * this.breakPer) ) ){
+		( (this.breakPer > 0.7) && (Math.random() < 0.2 * this.breakPer) ) ){
 		for( var i = (this.crack.length-1); i >= 0; i-- ){
-			if( this.crack[i].mode < 1.0 )
-				this.crack[i].detach( (Math.random() < 0.5), this.pos.y );
+			this.crack[i].detach( (Math.random() < 0.5), this.pos.y );
 		}
 		this.breakPer = 1.1;
 	}
@@ -167,7 +167,8 @@ RockCrack.prototype.collide = function( position, crack ){
 		var p = new THREE.Vector3( cx/2.0 + position.x, 
 								   cy/2.0 + position.y * this.type, 
 								   cz/2.0 + position.z );
-		rockParticle.drop( p, this.pos, Math.floor(20 + 30 * Math.random()) );
+		rockParticle.drop( p, this.pos, Math.floor(rockConfig.particleDroprate + 
+												   rockConfig.particleDroprate * Math.random()) );
 
 		if( crack.mode < 1 )
 			this.collision 		*= 0.9;
@@ -200,6 +201,7 @@ RockCrack.prototype.addForce = function( x, y, z ){
 }
 
 RockCrack.prototype.detach = function( outburst, level ){
+	if( this.mode >= 1.0 || this.mode < 0.0 ) return;
 	this.mode 	= 1.0;
 	if(outburst){
 		this.pos.multiplyScalar( 0.5 + Math.random() * 0.7 );		
@@ -218,15 +220,15 @@ RockCrack.prototype.update = function( position, scaler ) {
 	this.tick += 1;
 	if( this.mode < 1 ) return;
 
-	this.velocity.x = THREE.Math.clamp ( 	this.velocity.x, 
-											-rockConfig.velocityLimit, 
-											+rockConfig.velocityLimit );
-	this.velocity.y = THREE.Math.clamp ( 	this.velocity.y, 
-											-rockConfig.velocityLimit, 
-											+rockConfig.velocityLimit );
-	this.velocity.z = THREE.Math.clamp ( 	this.velocity.z, 
-											-rockConfig.velocityLimit, 
-											+rockConfig.velocityLimit );
+	this.velocity.x = THREE.Math.clamp ( this.velocity.x, 
+										 -rockConfig.velocityLimit, 
+										 +rockConfig.velocityLimit );
+	this.velocity.y = THREE.Math.clamp ( this.velocity.y, 
+										 -rockConfig.velocityLimit, 
+										 +rockConfig.velocityLimit );
+	this.velocity.z = THREE.Math.clamp ( this.velocity.z, 
+										 -rockConfig.velocityLimit, 
+										 +rockConfig.velocityLimit );
 
 	if( this.type == 1 ){	//orbiting cracks
 		//rotation
@@ -271,11 +273,8 @@ RockCrack.prototype.update = function( position, scaler ) {
 		this.pos.y 		+= this.velocity.y;
 		this.pos.z 		+= this.velocity.z;
 
-		var currlevel = Math.max( 	rockConfig.terrainLevel, 
-									this.pos.y );
-		this.mesh.position.set( position.x 	+ this.pos.x, 
-								currlevel, 
-								position.z 	+ this.pos.z );
+		var currlevel 	 = Math.max( rockConfig.terrainLevel, this.pos.y );
+		this.mesh.position.set( position.x + this.pos.x, currlevel, position.z + this.pos.z );
 	
 		if( currlevel > rockConfig.terrainLevel ){
 			//rotation - make dropping ones rotate a little faster than orbiting ones
@@ -283,6 +282,14 @@ RockCrack.prototype.update = function( position, scaler ) {
 			this.mesh.rotation.x += this.collision * scaler * this.rotSpeed * this.rotAxis.x;
 			this.mesh.rotation.y += this.collision * scaler * this.rotSpeed * this.rotAxis.y;
 			this.mesh.rotation.z += this.collision * scaler * this.rotSpeed * this.rotAxis.z;
+			
+			if( currlevel < rockConfig.terrainLevel + 0.08 * (position.y - rockConfig.terrainLevel) ){
+				var dist = 	this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y +
+							this.velocity.z * this.velocity.z;
+				if( dist <= rockConfig.minMoveThreshold )
+					this.mode = -1;
+			}
+		
 		}else{
 			this.mode = - 1; //mark this crack's mode to -1, might need to dispose this mesh
 							 //for memory concern?

@@ -210,7 +210,7 @@ function initScene() {
 		LoadTerrainMatEnvMap();
 	}
 	
-	PrepareRockParticle( 5000, 0.15, 0.35 );
+	PrepareRockParticle( 15000, 0.15, 0.35 );
 
 	LoadTerrain();
 	LoadDummy();
@@ -224,13 +224,12 @@ function initScene() {
 	}
 	*/
 	for( var i = 0; i < 5; i++ ){
-
-			var nx = Math.sin(Math.PI*2*i/5)*256;
-			var ny = -316;
-			var nz = Math.cos(Math.PI*2*i/5)*256;
-			//var stonePos = new THREE.Vector3(-688 + 256 * i, -316, -237 + j * 256 );
-			var stonePos = new THREE.Vector3(nx, ny, nz);
-			rocks.push(CreateRock(0, 153, 20, stonePos));
+		var nx = Math.sin(Math.PI*2*i/5)*256;
+		var ny = -316;
+		var nz = Math.cos(Math.PI*2*i/5)*256;
+		//var stonePos = new THREE.Vector3(-688 + 256 * i, -316, -237 + j * 256 );
+		var stonePos = new THREE.Vector3(nx, ny, nz);
+		rocks.push(CreateRock(0, 154, 20, stonePos));
 	}
 
 	//EVENTS
