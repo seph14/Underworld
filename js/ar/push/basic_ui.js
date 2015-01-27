@@ -1,41 +1,75 @@
 'use strict';
 
 
+var fpsCount;
 var layer01;
 var layer02;
+
+var view0Layers = [];
+var view1Layers = [];
 
 var currentView = 0;
 
 function initScene() {
 
-	console.log("hail to the moon");
-	new PushCore(updateScene);
+	console.log("basic_ui.initScene");
 
-	layer01 = new PushComponent(document.getElementById("div01"));
-	layer02 = pushCore.addComponent(new PushComponent(document.getElementById("div02")));
-	pushCore.addComponent(layer01);
+	new PushCore();
 
+	fpsCount = pushCore.addComponent(new PushComponent(document.getElementById("console"),-1));
+	layer01  = pushCore.addComponent(new PushComponent(document.getElementById("div01"),0));
+	layer02  = pushCore.addComponent(new PushComponent(document.getElementById("div02"),1));
 
+	fpsCount.x 	= 100;
+	layer01.x 	= 80;
+	layer01.x 	= 260;
+	//layer01.setBtnID(0);
+
+	for(var i=0; i<0; i++) {
+		var newDiv = document.createElement("div");
+		 document.body.appendChild(newDiv);
+		view0Layers.push(pushCore.addComponent(new PushComponent(newDiv)));
+	}
+
+	for(var i=0; i<0; i++) {
+		var newDiv = document.createElement("div");
+		 document.body.appendChild(newDiv);
+		view1Layers.push(pushCore.addComponent(new PushComponent(newDiv)));
+	}
+
+	pushCore.onUpdate 	= onUpdate;
+	pushCore.onBtnClick = onBtnClick;
 
 }
 
-function updateScene() {
+function onUpdate() {
 
+	fpsCount.push(pushCore.fps+" fps");
 
 	switch(currentView) {
 		 case 0:
-		 if(layer01!=null) layer01.push();
+		 layer01.push("Phase 1");
+			for(var i=0; i<view0Layers.length;i++) {
+				view0Layers[i].push("Phase 1 "+i, 1);
+			}
 		 break;
 		 case 1:
-		 if(layer02!=null) layer02.push();
+		 layer02.push("Phase 2");
+			for(var i=0; i<view1Layers.length;i++) {
+				view1Layers[i].push("Phase 2 "+i, 0);
+			}
 		 break;
 	}
-	//console.log("hail to updateScene");
-	//console.log(layer01);
-	//console.log(layer02);
-	//if(layer01!=null)	layer01.setContent("nervous");
-	//layer01.setContent("moin");
-	//document.getElementById("div01").innerHTML = layer01.pushValue;
+
+}
+
+function onBtnClick(btnID) {
+
+	console.log(".onBtnClick."+btnID);
+
+	if(btnID==0)	currentView = 1;
+	if(btnID==1)	currentView = 0;
+
 }
 
 this.onKeyDown = function ( event ) {
