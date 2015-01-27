@@ -195,7 +195,11 @@ function LoadTerrainMatEnvMap(){
 
 function LoadTerrain( ){
 	var manager = new THREE.LoadingManager();
-	manager.onProgress = function ( item, loaded, total ) { };
+	manager.onProgress = function ( item, loaded, total ) { 
+
+		console.log(item, loaded, total);
+
+	};
 	
 	var onProgress 	= function ( xhr ) { };
 	var onError 	= function ( xhr ) { trace("file not found"); };

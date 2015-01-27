@@ -49,6 +49,7 @@ function onUpdate() {
 	switch(currentView) {
 		 case 0:
 		 layer01.push("Phase 1");
+
 			for(var i=0; i<view0Layers.length;i++) {
 				view0Layers[i].push("Phase 1 "+i, 1);
 			}
@@ -60,6 +61,8 @@ function onUpdate() {
 			}
 		 break;
 	}
+
+	$('.pie_progress').asPieProgress('go',layer01.pushValue*100);
 
 }
 
