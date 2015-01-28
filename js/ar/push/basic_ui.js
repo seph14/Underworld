@@ -8,6 +8,8 @@ var btn03;
 var head_large;
 var quote_top;
 var darker;
+var totale;
+var rocktemp;
 var preloader;
 
 var view0btns = [];
@@ -22,7 +24,7 @@ function initScene() {
 	new PushCore();
 
 	fpsCount = pushCore.addComponent(new PushComponent(document.getElementById("console"),-99));
-	
+
 	btn01  = pushCore.addComponent(new PushComponent(document.getElementById("btn01"),0));
 	btn02  = pushCore.addComponent(new PushComponent(document.getElementById("btn02"),1));
 	btn03  = pushCore.addComponent(new PushComponent(document.getElementById("btn03"),2));
@@ -34,6 +36,9 @@ function initScene() {
 	quote_top  = pushCore.addComponent(new PushComponent(document.getElementById("quote_top"),-99));
 	quote_top.offy = -20;
 	quote_top.duration = .32;
+
+	totale  = pushCore.addComponent(new PushComponent(document.getElementById("totale"),-99));
+	rocktemp  = pushCore.addComponent(new PushComponent(document.getElementById("rocktemp"),-99));
 
 	darker  = pushCore.addComponent(new PushComponent(document.getElementById("darker"),-99));
 	darker.alpha = .5;
@@ -80,14 +85,22 @@ function onUpdate() {
 
 		 break;
 		 case 1:
+		 rocktemp.push("");
 		 head_large.push("");
 		 quote_top.push("<p>\“ This is a set of beautiful components which include everything \„</p>");
 
 		 break;
+		 case 2:
+		 head_large.push("");
+		 quote_top.push("<p>\“ This is a set of beautiful components which include everything \„</p>");
+
+		 totale.push("");
+		 
+		 break;
 	}
 
 	if(Math.random()<.1)
-		$('.pie_progress').asPieProgress('go',btn02.pushValue*100);
+		$('.pie_progress').asPieProgress('go',btn01.pushValue*100);
 
 }
 

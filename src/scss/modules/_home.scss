@@ -42,7 +42,30 @@
     margin: 0px;
     padding: 0px;
  }
-
+#totale {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background: url(../img/totale.jpg) no-repeat center center fixed; 
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+#rocktemp {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background: url(../img/rock.jpg) no-repeat center center fixed; 
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
  .pie_progress {
   text-align: center;
   position: relative;
@@ -58,7 +81,7 @@
 .pie_progress__icon {
   width: 100%;
   position: absolute;
-  top: 50%;
+  top: 40%;
   left: 0;
   -webkit-transform: translateY(-50%);
       -ms-transform: translateY(-50%);

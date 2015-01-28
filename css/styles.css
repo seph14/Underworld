@@ -304,7 +304,35 @@ a#open-about {
   padding: 0px;
 }
 
-/* line 46, ../src/scss/modules/_home.scss */
+/* line 45, ../src/scss/modules/_home.scss */
+#totale {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: url(../img/totale.jpg) no-repeat center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+
+/* line 57, ../src/scss/modules/_home.scss */
+#rocktemp {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: url(../img/rock.jpg) no-repeat center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+
+/* line 69, ../src/scss/modules/_home.scss */
 .pie_progress {
   text-align: center;
   position: relative;
@@ -312,19 +340,19 @@ a#open-about {
   transform-style: preserve-3d;
 }
 
-/* line 52, ../src/scss/modules/_home.scss */
+/* line 75, ../src/scss/modules/_home.scss */
 .pie_progress svg {
   margin: 0 auto;
 }
 
-/* line 55, ../src/scss/modules/_home.scss */
+/* line 78, ../src/scss/modules/_home.scss */
 .pie_progress__content,
 .pie_progress__number,
 .pie_progress__label,
 .pie_progress__icon {
   width: 100%;
   position: absolute;
-  top: 50%;
+  top: 40%;
   left: 0;
   -webkit-transform: translateY(-50%);
   -ms-transform: translateY(-50%);
@@ -332,18 +360,18 @@ a#open-about {
   transform: translateY(-50%);
 }
 
-/* line 68, ../src/scss/modules/_home.scss */
+/* line 91, ../src/scss/modules/_home.scss */
 .pie_progress__number {
   font-size: 24px;
 }
 
-/* line 71, ../src/scss/modules/_home.scss */
+/* line 94, ../src/scss/modules/_home.scss */
 .pie_progress__label {
   margin-top: 32px;
   font-size: 12px;
 }
 
-/* line 77, ../src/scss/modules/_home.scss */
+/* line 100, ../src/scss/modules/_home.scss */
 #preloader {
   position: absolute;
   top: 50%;
@@ -352,7 +380,7 @@ a#open-about {
   margin-top: -75px;
 }
 
-/* line 86, ../src/scss/modules/_home.scss */
+/* line 109, ../src/scss/modules/_home.scss */
 #info {
   position: relative;
   margin: 0 auto -2.1em;
@@ -362,7 +390,7 @@ a#open-about {
   z-index: 100;
 }
 
-/* line 95, ../src/scss/modules/_home.scss */
+/* line 118, ../src/scss/modules/_home.scss */
 #console {
   position: absolute;
   margin: 0 auto -2.1em;
@@ -373,22 +401,22 @@ a#open-about {
   z-index: 100;
 }
 
-/* line 105, ../src/scss/modules/_home.scss */
+/* line 128, ../src/scss/modules/_home.scss */
 #btn01 {
   left: 96px;
 }
 
-/* line 108, ../src/scss/modules/_home.scss */
+/* line 131, ../src/scss/modules/_home.scss */
 #btn02 {
   left: 256px;
 }
 
-/* line 111, ../src/scss/modules/_home.scss */
+/* line 134, ../src/scss/modules/_home.scss */
 #btn03 {
   left: 420px;
 }
 
-/* line 115, ../src/scss/modules/_home.scss */
+/* line 138, ../src/scss/modules/_home.scss */
 .btn {
   font-size: 6.25px;
   font-size: 0.625rem;
