@@ -5,7 +5,7 @@ var coreMat;
 var rockParticle;
 
 var rockConfig = {
-		distThreshold 		: 800,
+		distThreshold 		: 700,
 		// = square distance of click for rock crack
 		rockParticleCnt		: 100000,
 		//maximum particle count
@@ -125,7 +125,7 @@ RockAssemble.prototype.cast = function( raycaster ) {
 	
 	this.target    = 0.0;
 	this.speed     = 0.3;
-	this.breakPer += 0.25;
+	this.breakPer += 0.075;
 
 	for( var i = (this.crack.length-1); i >= 0; i-- ){
 		if( this.crack[i].mode >= 1.0 ) continue;
@@ -353,7 +353,7 @@ RockParticle.prototype.drop   = function( point, center, cnt ) {
 	return true;
 }
 
-RockParticle.prototype.update = function( scaler ) {
+RockParticle.prototype.update = function( scaler, elapsedTime ) {
 	if( this.enabled ){
 		this.enabled 		= false;
 		this.firstAvailable = this.cnt + 1;
@@ -374,6 +374,8 @@ RockParticle.prototype.update = function( scaler ) {
 		this.particleCloud.geometry.addAttribute( 'position', 	
 			new THREE.BufferAttribute( this.particlePosition, 3 ) );
 		this.particleCloud.geometry.computeBoundingSphere();
+		//maybe we don't need this, just manually set visible every frame?
+		//this.particleCloud.material.uniforms.uTime.value = elapsedTime;
 	}
 
 	this.particleCloud.visible = this.enabled;
@@ -513,8 +515,7 @@ function PrepareRockParticle( cnt, scaleMin, scaleMax ){
 	
 	rockParticle 					= new RockParticle();
 	rockParticle.cnt 				= cnt;
-	//TODO: size, normals, colors should be good as constant values,
-	//		remove them from property values
+
 	var geometry 					= new THREE.BufferGeometry();
 	rockParticle.particleVelocity 	= new Float32Array( cnt * 3 );
 	rockParticle.particlePosition 	= new Float32Array( cnt * 3 );
@@ -522,12 +523,10 @@ function PrepareRockParticle( cnt, scaleMin, scaleMax ){
 	
 	var particleColor 				= new Float32Array( cnt * 3 );
 	var particleSize 				= new Float32Array( cnt * 1 );
-	var particleNormal 				= new Float32Array( cnt * 3 );
+	//var particleRot 				= new Float32Array( cnt * 1 );
 
 	var color 			= new THREE.Color(0xffffff); //new THREE.Color(0x67535e);
-	//color.setHSL( 0.908, 0.3, 0.11 );
-	//need to randomize this later
-
+	
 	for ( var i = 0; i < cnt; i ++ ) {
 		//velocity, default to 0
 		rockParticle.particleVelocity[3*i+0] = 0;
@@ -541,7 +540,7 @@ function PrepareRockParticle( cnt, scaleMin, scaleMax ){
 		rockParticle.particleMass[i]	= Math.random() * 0.5 + 0.5;
 		
 		//color, random in hsl
-		color.setHSL( 0.85 + 0.1 * Math.random(), 0.3, 0.11 ); 
+		color.setHSL( 0.075, 0.4, 0.24 + 0.3 * Math.random() ); 
 		//TODO: need to come up with a good brown-ish hsl random algorithm
 		particleColor[3*i+0] = color.r;
 		particleColor[3*i+1] = color.g;
@@ -550,59 +549,46 @@ function PrepareRockParticle( cnt, scaleMin, scaleMax ){
 		//size, randomize
 		particleSize[i]	  = scaleMin + Math.random() * (scaleMax - scaleMin);
 		
-		//normals, randomize 
-		particleNormal[3*i+0]	= Math.random() - 0.5;
-		particleNormal[3*i+1]	= Math.random() - 0.5;
-		particleNormal[3*i+2]	= Math.random() - 0.5;
+		//rotation, randomize 
+		//particleRot[i]	  = 2 * Math.PI * Math.random();
 	}
 
 	geometry.addAttribute( 'position', 	
 		new THREE.BufferAttribute( rockParticle.particlePosition, 	3 ) );
-	geometry.addAttribute( 'normal', 		
-		new THREE.BufferAttribute( particleNormal, 	  				3 ) );
+	//geometry.addAttribute( 'rotation', 		
+	//	new THREE.BufferAttribute( particleRot, 	  				1 ) );
 	geometry.addAttribute( 'pcolor', 	
 		new THREE.BufferAttribute( particleColor,    				3 ) );
 	geometry.addAttribute( 'size', 		
 		new THREE.BufferAttribute( particleSize, 	 				1 ) );
 	geometry.computeBoundingSphere();
 
-	var shader 	 = THREE.ShaderParticle[ "Particle_Env" ];
+	//var shader 	 = THREE.ShaderParticle[ "Particle" ];
+	var shader 	 = THREE.ShaderParticle[ "Particle_Simple" ];
 	var uniforms = THREE.UniformsUtils.clone( shader.uniforms );
 
-	var path = "textures/envmap/";
-	var format = '.png';
-	var urls = [
-		path + 'px' + format, path + 'nx' + format,
-		path + 'py' + format, path + 'ny' + format,
-		path + 'pz' + format, path + 'nz' + format
-	];
-	var textureCube = THREE.ImageUtils.loadTextureCube( urls, new THREE.CubeRefractionMapping() );
-	//uniforms[ "uCubeMapTex" ].value 	= textureCube;
-
-	uniforms[ "uBaseColorMap" ].value 	= THREE.ImageUtils.loadTexture( "textures/rock_particle.png" );
-	//uniforms[ "uRoughness" ].value    	= 0.8;	
-	//uniforms[ "uMetallic"  ].value    	= 0.3;	
-	//uniforms[ "uSpecular"  ].value    	= 0.3;	
-			
-	//uniforms[ "uExposure"  ].value    	= 6.3375;
-	uniforms[ "uGamma" 	   ].value    	= 2.2;
+	//uniforms[ "uBaseColorMap" ].value 	= THREE.ImageUtils.loadTexture( "textures/rock_particle.png" );
+	//uniforms[ "uTime" 	   ].value    	= 0.0;
 	
 	var attributes = {
-		size:  { type: 'f', value: [] },
-		pcolor: { type: 'c', value: [] }
+		//rotation:   { type: 'f', value: [] },
+		size:   	{ type: 'f', value: [] },
+		pcolor: 	{ type: 'c', value: [] }
 	};
 
-	var parameters = { fragmentShader: 	shader.fragmentShader, 
-					   vertexShader: 	shader.vertexShader, 
-					   uniforms: 		uniforms,
-					   attributes: 		attributes,
-					   fog: 			true,
-					   blending: 		THREE.MultiplyBlending,
-					   depthWrite: 		false,
-					   transparent: 	true };
-	var material = new THREE.ShaderMaterial( parameters );
+	var parameters 	= { fragmentShader: shader.fragmentShader, 
+					    vertexShader: 	shader.vertexShader, 
+					    uniforms: 		uniforms,
+					    attributes: 	attributes,
+					    fog: 			true,
+					    blending: 		THREE.NormalBlending,
+					    depthWrite: 	false,
+					    depthTest: 		true//,
+					    //transparent: 	true 
+					};
+	var material 	= new THREE.ShaderMaterial( parameters );
 
-	rockParticle.particleCloud = new THREE.PointCloud( geometry, material );
+	rockParticle.particleCloud 		   = new THREE.PointCloud( geometry, material );
 	rockParticle.particleCloud.visible = false;
 	rockParticle.particleCloud.dynamic = true;
 

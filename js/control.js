@@ -4,8 +4,10 @@ var USELIGHTS = false;
 var MARGIN = 0;
 var WIDTH = window.innerWidth || 2;
 var HEIGHT = window.innerHeight || ( 2 + 2 * MARGIN );
-var SCREEN_WIDTH = WIDTH;
-var SCREEN_HEIGHT = HEIGHT - 2 * MARGIN;
+var SCREEN_WIDTH  = window.innerWidth;
+var	SCREEN_HEIGHT = window.innerHeight - 2 * MARGIN;
+//var SCREEN_WIDTH = WIDTH;
+//var SCREEN_HEIGHT = HEIGHT - 2 * MARGIN;
 var FAR  = 10000;
 var NEAR = 1;
 var touchable;
@@ -184,8 +186,8 @@ function initScene() {
 	var renderSky    = new THREE.RenderPass( sceneCube, cameraCube );
 	var renderModel  = new THREE.RenderPass( scene, camera );
 
-	renderer.autoClear = false;
-	renderModel.clear = true;
+	renderer.autoClear = true;
+	renderModel.clear  = true;
 
 	effectFXAA = new THREE.ShaderPass( THREE.FXAAShader );
 	effectFXAA.uniforms[ 'resolution' ].value.set( 1 / SCREEN_WIDTH, 1 / SCREEN_HEIGHT );
@@ -210,7 +212,7 @@ function initScene() {
 		LoadTerrainMatEnvMap();
 	}
 	
-	PrepareRockParticle( 15000, 0.15, 0.35 );
+	PrepareRockParticle( 15000, 0.05, 0.075 );
 
 	LoadTerrain();
 	LoadDummy();
@@ -233,12 +235,18 @@ function initScene() {
 	}
 
 	//EVENTS
-	document.addEventListener( 'mousemove',  onDocumentMouseMove,  false );
+	document.addEventListener(  touchable ? 'touchmove'  : 'mousemove',  
+											 onDocumentMouseMove,  false );
 	container.addEventListener( touchable ? 'touchstart' : 'click', 	 
 											 onDocumentMouseDown,  false );
 	window.addEventListener  ( 'resize',     onWindowResize,       false );
 	window.addEventListener  ( 'keydown',    onKeyDown,            false ); 
 
+	//if(touchable){
+		onWindowResize();
+	//}
+
+	clock.start();
 
 	animate();
 }
@@ -246,7 +254,7 @@ function initScene() {
 function onWindowResize() {
 	SCREEN_WIDTH  = window.innerWidth;
 	SCREEN_HEIGHT = window.innerHeight - 2 * MARGIN;
-
+	
 	camera.aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
 	camera.updateProjectionMatrix();
 
@@ -256,8 +264,17 @@ function onWindowResize() {
 	renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
 	composer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
 
-	effectFXAA.uniforms[ 'resolution' ].value.set( 1 / SCREEN_WIDTH, 1 / SCREEN_HEIGHT );
-	//camControl.handleResize();
+	if( touchable ){
+		//this 0.5 should be 1.0 / scale 
+		//so for iphone6plus this should be 0.33?
+		//need to test though
+		effectFXAA.uniforms[ 'resolution' ]
+		.value.set( 0.5 / SCREEN_WIDTH, 0.5 / SCREEN_HEIGHT );
+
+	}else{
+		effectFXAA.uniforms[ 'resolution' ]
+		.value.set( 1 / SCREEN_WIDTH, 1 / SCREEN_HEIGHT );
+	}
 }
 
 function onKeyDown( event ){
@@ -278,18 +295,23 @@ function onDocumentMouseDown( event ){
 		mousex = ( event.clientX / window.innerWidth ) * 2 - 1;
 		mousey = - ( event.clientY / window.innerHeight ) * 2 + 1;
 	}
-		
+	
 	var vector 		= new THREE.Vector3( mousex, mousey, 0.5 ).unproject( camera );
 	var raycaster 	= new THREE.Raycaster( camera.position, vector.sub( camera.position ).normalize() );
-	trace( raycaster );
 	for( var i  = rocks.length-1; i >= 0; i-- ){
 		if( rocks[i].cast( raycaster ) ) break;
 	}
 }
 
 function onDocumentMouseMove( event ) {	
-	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-    mouse.y = ( event.clientY / window.innerHeight ) * 2 - 1;
+	if(touchable){
+		var touchobj = event.changedTouches[0];
+		mouse.x = ( touchobj.clientX / window.innerWidth ) * 2 - 1;
+	    mouse.y = ( touchobj.clientY / window.innerHeight ) * 2 - 1;
+	}else{
+		mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	    mouse.y = ( event.clientY / window.innerHeight ) * 2 - 1;
+	}
 }
 
 function animate() {
@@ -309,7 +331,8 @@ function render() {
 		rocks[i].update();
 	}
 
-	rockParticle.update( rocks[3].scaler );
+	var t = 5 * clock.getElapsedTime ();
+	rockParticle.update( rocks[3].scaler, t );
 
 	/*
 	if( rocks.length > 4 ){
