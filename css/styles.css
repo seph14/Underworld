@@ -130,7 +130,7 @@ h2, h3, a#escape, a#open-map-from-gallery {
 }
 
 /* line 7, ../src/scss/base/_typography.scss */
-#gallery h3, p, a#open-about {
+#gallery h3, p, a#open-about, .btn {
   font-family: 'Times New Roman', serif;
   font-style: italic;
   color: white;
@@ -363,53 +363,46 @@ a#open-about {
 }
 
 /* line 95, ../src/scss/modules/_home.scss */
-#div01 {
-  position: absolute;
-  margin: 0 auto -2.1em;
-  left: 96px;
-  bottom: 192px;
-  width: 100px;
-  padding: 5px;
-  z-index: 100;
-  cursor: pointer;
-  background-color: #000;
-}
-
-/* line 106, ../src/scss/modules/_home.scss */
-#div02 {
-  position: absolute;
-  margin: 0 auto -2.1em;
-  left: 192px;
-  bottom: 192px;
-  width: 100px;
-  padding: 5px;
-  z-index: 100;
-  cursor: pointer;
-  background-color: #000;
-}
-
-/* line 118, ../src/scss/modules/_home.scss */
-.btn {
-  position: absolute;
-  margin: 0 auto -2.1em;
-  bottom: 192px;
-  width: 100px;
-  padding: 5px;
-  z-index: 100;
-  cursor: pointer;
-  background-color: #000;
-}
-
-/* line 130, ../src/scss/modules/_home.scss */
 #console {
-  position: relative;
+  position: absolute;
   margin: 0 auto -2.1em;
-  top: 0px;
-  width: 550px;
+  bottom: 0px;
+  right: 0px;
+  width: 50px;
   padding: 5px;
   z-index: 100;
-  text-align: left;
-  color: #000;
+}
+
+/* line 105, ../src/scss/modules/_home.scss */
+#btn01 {
+  left: 96px;
+}
+
+/* line 108, ../src/scss/modules/_home.scss */
+#btn02 {
+  left: 256px;
+}
+
+/* line 111, ../src/scss/modules/_home.scss */
+#btn03 {
+  left: 420px;
+}
+
+/* line 115, ../src/scss/modules/_home.scss */
+.btn {
+  font-size: 6.25px;
+  font-size: 0.625rem;
+  line-height: 1.2;
+  color: #fffeff;
+  font-style: italic;
+  position: absolute;
+  margin: 0 auto -2.1em;
+  width: 100px;
+  padding: 5px;
+  z-index: 100;
+  cursor: pointer;
+  bottom: 32px;
+  text-decoration: underline;
 }
 
 /*# sourceMappingURL=styles.css.map */

@@ -92,48 +92,38 @@
     z-index:100;
 }
 
-#div01 {
+#console {
     position: absolute;
     margin: 0 auto -2.1em;
-    left: 96px;
-    bottom: 192px;
-    width: 100px;
+    bottom: 0px;
+    right: 0px;
+    width: 50px;
     padding: 5px;
     z-index:100;
-    cursor: pointer;
-    background-color: #000;
 }
-#div02 {
-    position: absolute;
-    margin: 0 auto -2.1em;
-    left: 192px;
-    bottom: 192px;
-    width: 100px;
-    padding: 5px;
-    z-index:100;
-    cursor: pointer;
-    background-color: #000;
+
+#btn01 {
+    left: 96px;
+}
+#btn02 {
+    left: 256px;
+}
+#btn03 {
+    left: 420px;
 }
 
 .btn {
-
-    position: absolute;
+    @extend %font-medium;
+  @include font-size(10, 12);
+  color: $color-white;
+  font-style: italic;
+  position: absolute;
     margin: 0 auto -2.1em;
-    bottom: 192px;
     width: 100px;
     padding: 5px;
     z-index:100;
     cursor: pointer;
-    background-color: #000;
-}
-
-#console {
-    position: relative;
-    margin: 0 auto -2.1em;
-    top: 0px;
-    width: 550px;
-    padding: 5px;
-    z-index:100;
-    text-align: left;
-    color: #000;
+   // background-color: #000;
+    bottom: 32px;
+    text-decoration: underline;
 }

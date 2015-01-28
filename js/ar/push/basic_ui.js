@@ -2,15 +2,16 @@
 
 
 var fpsCount;
-var layer01;
-var layer02;
+var btn01;
+var btn02;
+var btn03;
 var head_large;
 var quote_top;
 var darker;
 var preloader;
 
-var view0Layers = [];
-var view1Layers = [];
+var view0btns = [];
+var view1btns = [];
 
 var currentView = 0;
 
@@ -21,8 +22,10 @@ function initScene() {
 	new PushCore();
 
 	fpsCount = pushCore.addComponent(new PushComponent(document.getElementById("console"),-99));
-	layer01  = pushCore.addComponent(new PushComponent(document.getElementById("div01"),1));
-	layer02  = pushCore.addComponent(new PushComponent(document.getElementById("div02"),0));
+	
+	btn01  = pushCore.addComponent(new PushComponent(document.getElementById("btn01"),0));
+	btn02  = pushCore.addComponent(new PushComponent(document.getElementById("btn02"),1));
+	btn03  = pushCore.addComponent(new PushComponent(document.getElementById("btn03"),2));
 
 	head_large  = pushCore.addComponent(new PushComponent(document.getElementById("head_large"),-99));
 	head_large.offy = 50;
@@ -36,22 +39,24 @@ function initScene() {
 	darker.alpha = .5;
 
 	preloader  = pushCore.addComponent(new PushComponent(document.getElementById("preloader"),-99));
+	preloader.offy = -64;
+	preloader.duration = 0.8;
 
 	fpsCount.x 	= 100;
-	layer01.x 	= 80;
-	layer02.x 	= 260;
-	//layer01.setBtnID(0);
+	btn01.x 	= 80;
+	btn02.x 	= 260;
+	//btn01.setBtnID(0);
 
 	for(var i=0; i<0; i++) {
 		var newDiv = document.createElement("div");
 		 document.body.appendChild(newDiv);
-		view0Layers.push(pushCore.addComponent(new PushComponent(newDiv)));
+		view0btns.push(pushCore.addComponent(new PushComponent(newDiv)));
 	}
 
 	for(var i=0; i<0; i++) {
 		var newDiv = document.createElement("div");
 		 document.body.appendChild(newDiv);
-		view1Layers.push(pushCore.addComponent(new PushComponent(newDiv)));
+		view1btns.push(pushCore.addComponent(new PushComponent(newDiv)));
 	}
 
 	pushCore.onUpdate 	= onUpdate;
@@ -61,18 +66,20 @@ function initScene() {
 
 function onUpdate() {
 
-	//fpsCount.push(pushCore.fps+" fps");
+	fpsCount.push(pushCore.fps+" fps");
+
+	 btn01.push("preloader");
+	 btn02.push("welcome, humans");
+	 btn03.push("enter the dome");
 
 	switch(currentView) {
 		 case 0:
-		 layer02.push("preloader");
 		 quote_top.push("<p>\“ This is a set of beautiful components which include everything \„</p>");
 		 darker.push("");
 		 preloader.push("");
 
 		 break;
 		 case 1:
-		 layer01.push("welcome");
 		 head_large.push("");
 		 quote_top.push("<p>\“ This is a set of beautiful components which include everything \„</p>");
 
@@ -80,7 +87,7 @@ function onUpdate() {
 	}
 
 	if(Math.random()<.1)
-		$('.pie_progress').asPieProgress('go',layer02.pushValue*100);
+		$('.pie_progress').asPieProgress('go',btn02.pushValue*100);
 
 }
 
@@ -88,8 +95,9 @@ function onBtnClick(btnID) {
 
 	console.log(".onBtnClick."+btnID);
 
-	if(btnID==0)	currentView = 1;
-	if(btnID==1)	currentView = 0;
+	if(btnID==0)	currentView = 0;
+	if(btnID==1)	currentView = 1;
+	if(btnID==2)	currentView = 2;
 
 }
 
