@@ -13,7 +13,7 @@ var PushComponent = function (domElement, btnID) {
 
 	var ref = this;
 
-	if(btnID!=null) {
+	if(btnID!=null && btnID>-1) {
 		$( domElement ).click(function() {
 		  //alert( "Handler for .click() called."+ref.btnID );
 		  pushCore.btnClick(ref.btnID);
@@ -24,9 +24,15 @@ var PushComponent = function (domElement, btnID) {
 	this.wasPushed = false;
 	this.wasPulled = false;
 
-	this.duration = .1+Math.random();
+	this.duration = .5; //.1+Math.random();
 
 	this.x = $(this.domElement).offset().left;
+	this.y = $(this.domElement).offset().top;
+
+	this.offx = 0;
+	this.offy = 0;
+
+	this.alpha = 1.0;
 
 	this.value = "";
 	this.update();
@@ -72,12 +78,20 @@ PushComponent.prototype.update = function() {
 
 	// PUT YOUR OWN STUFF IN HERE:
 
-	jQuery(this.domElement).css('opacity', this.pushValue+0.2);
+	jQuery(this.domElement).css('opacity', this.pushValue*this.pushValue*this.alpha);
 	var offset = {top: -32*(1-this.pushValue), left: 100};
 	
-	offset.top = Math.easeInOutExpo(this.pushValue,0,1,1)*320;
+	var pushValueInOutExpo = Math.easeInOutExpo(1-this.pushValue,0,1,1);
+	var pushValueOutExpo = Math.easeOutExpo(1-this.pushValue,0,1,1);
+	var pushValueInExpo = Math.easeInExpo(1-this.pushValue,0,1,1);
+	offset.top = pushValueInExpo*this.offy+this.y;
+	offset.left = this.x;
 
-	$(this.domElement).offset({ top: offset.top, left: this.x})
+	if(this.pushMode == PushMode.pull)	{
+			//offset.top = pushValueOutExpo*this.offy+this.y;
+	}
+
+	$(this.domElement).offset({ top: offset.top})
 	//this.domElement.innerHTML = this.pushMode+" / "+Math.round(this.pushValue*100)+"% "+this.value;
-	this.domElement.innerHTML = "<tt>"+this.value+"</tt>";
+	if(this.value!="")	this.domElement.innerHTML = "<tt>"+this.value+"</tt>";
 };

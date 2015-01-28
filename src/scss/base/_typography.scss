@@ -5,7 +5,9 @@
 }
 
 %font-medium {
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Times New Roman', serif;
+  font-style: italic;
+  color: white;
   font-weight: 600;
 }
 
@@ -60,8 +62,9 @@ h3 {
 
 p {
   @extend %font-medium;
-  @include font-size(14, 20);
-  color: $color-grey;
+  @include font-size(16, 22);
+  color: $color-white;
+  font-style: italic;
   .about &{
     @include font-size(10, 16);
   }

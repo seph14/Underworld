@@ -131,23 +131,25 @@ h2, h3, a#escape, a#open-map-from-gallery {
 
 /* line 7, ../src/scss/base/_typography.scss */
 #gallery h3, p, a#open-about {
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Times New Roman', serif;
+  font-style: italic;
+  color: white;
   font-weight: 600;
 }
 
-/* line 12, ../src/scss/base/_typography.scss */
+/* line 14, ../src/scss/base/_typography.scss */
 html {
   font-family: 'Open Sans', sans-serif;
 }
 
-/* line 22, ../src/scss/base/_typography.scss */
+/* line 24, ../src/scss/base/_typography.scss */
 h1, h2, h3, h4, h5, p, a, li, ol, ul, i, span, pre, div, input, select {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-style: normal;
 }
 
-/* line 32, ../src/scss/base/_typography.scss */
+/* line 34, ../src/scss/base/_typography.scss */
 h2 {
   font-size: 13.75px;
   font-size: 1.375rem;
@@ -155,7 +157,7 @@ h2 {
   color: #6e746e;
   text-transform: uppercase;
 }
-/* line 38, ../src/scss/base/_typography.scss */
+/* line 40, ../src/scss/base/_typography.scss */
 #gallery h2 {
   font-size: 9.375px;
   font-size: 0.9375rem;
@@ -163,7 +165,7 @@ h2 {
   color: #3aaa35;
 }
 
-/* line 44, ../src/scss/base/_typography.scss */
+/* line 46, ../src/scss/base/_typography.scss */
 h3 {
   font-size: 8.125px;
   font-size: 0.8125rem;
@@ -171,14 +173,14 @@ h3 {
   color: #6e746e;
   text-transform: uppercase;
 }
-/* line 49, ../src/scss/base/_typography.scss */
+/* line 51, ../src/scss/base/_typography.scss */
 #gallery h3 {
   font-size: 9.375px;
   font-size: 0.9375rem;
   line-height: 1.2;
   text-transform: none;
 }
-/* line 54, ../src/scss/base/_typography.scss */
+/* line 56, ../src/scss/base/_typography.scss */
 .about h3 {
   font-size: 6.875px;
   font-size: 0.6875rem;
@@ -186,38 +188,39 @@ h3 {
   text-align: left;
 }
 
-/* line 61, ../src/scss/base/_typography.scss */
+/* line 63, ../src/scss/base/_typography.scss */
 p {
-  font-size: 8.75px;
-  font-size: 0.875rem;
-  line-height: 1.42857;
-  color: #6e746e;
+  font-size: 10px;
+  font-size: 1rem;
+  line-height: 1.375;
+  color: #fffeff;
+  font-style: italic;
 }
-/* line 65, ../src/scss/base/_typography.scss */
+/* line 68, ../src/scss/base/_typography.scss */
 .about p {
   font-size: 6.25px;
   font-size: 0.625rem;
   line-height: 1.6;
 }
 
-/* line 70, ../src/scss/base/_typography.scss */
+/* line 73, ../src/scss/base/_typography.scss */
 a#escape, a#open-map-from-gallery {
   text-transform: uppercase;
 }
 
-/* line 75, ../src/scss/base/_typography.scss */
+/* line 78, ../src/scss/base/_typography.scss */
 a#escape {
   color: #fffeff;
   font-size: 9.375px;
   font-size: 0.9375rem;
   line-height: 1.2;
 }
-/* line 78, ../src/scss/base/_typography.scss */
+/* line 81, ../src/scss/base/_typography.scss */
 a#escape:active {
   color: #2d53b3;
 }
 
-/* line 84, ../src/scss/base/_typography.scss */
+/* line 87, ../src/scss/base/_typography.scss */
 a#open-map-from-gallery {
   color: #fffeff;
   font-size: 9.375px;
@@ -225,7 +228,7 @@ a#open-map-from-gallery {
   line-height: 1.2;
 }
 
-/* line 89, ../src/scss/base/_typography.scss */
+/* line 92, ../src/scss/base/_typography.scss */
 a#open-about {
   font-size: 6.25px;
   font-size: 0.625rem;
@@ -235,41 +238,178 @@ a#open-about {
 }
 
 /* line 1, ../src/scss/modules/_home.scss */
+#darker {
+  position: absolute;
+  background-color: #000;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+}
+
+/* line 9, ../src/scss/modules/_home.scss */
 #logo {
-  background-image: url(img/spritesheet.png);
+  background-image: url(../img/spritesheet.png);
   background-position: 0px 0px;
   width: 119px;
-  background-size: 261px 1629px;
+  background-size: 450px 123px;
   height: 13px;
+  top: 50%;
+  left: 50%;
+  margin-left: -59.5px;
+  margin-top: -6.5px;
   position: absolute;
-  position: absolute;
-  top: 50px;
+  top: 32px;
   left: 50px;
   margin: 0px;
   padding: 0px;
 }
 
-/* line 13, ../src/scss/modules/_home.scss */
-#social {
-  background-image: url(img/spritesheet.png);
-  background-position: 0px -37px;
-  width: 149px;
-  background-size: 261px 1629px;
-  height: 27px;
+/* line 19, ../src/scss/modules/_home.scss */
+#quote_top {
   position: absolute;
-  top: 50px;
-  right: 50px;
+  width: 256px;
+  margin-left: -128px;
+  top: 32px;
+  left: 50%;
+}
+
+/* line 27, ../src/scss/modules/_home.scss */
+#head_large {
+  background-image: url(../img/spritesheet.png);
+  background-position: 0px -37px;
+  width: 450px;
+  background-size: 450px 123px;
+  height: 38px;
+  top: 50%;
+  left: 50%;
+  margin-left: -225px;
+  margin-top: -19px;
+  position: absolute;
+  top: 128px;
+  left: 50%;
+}
+
+/* line 35, ../src/scss/modules/_home.scss */
+#social {
+  background-image: url(../img/spritesheet.png);
+  background-position: 0px -75px;
+  width: 146px;
+  background-size: 450px 123px;
+  height: 48px;
+  position: absolute;
+  top: 20px;
+  right: 20px;
   margin: 0px;
   padding: 0px;
 }
 
-/* line 24, ../src/scss/modules/_home.scss */
+/* line 46, ../src/scss/modules/_home.scss */
+.pie_progress {
+  text-align: center;
+  position: relative;
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+}
+
+/* line 52, ../src/scss/modules/_home.scss */
+.pie_progress svg {
+  margin: 0 auto;
+}
+
+/* line 55, ../src/scss/modules/_home.scss */
+.pie_progress__content,
+.pie_progress__number,
+.pie_progress__label,
+.pie_progress__icon {
+  width: 100%;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  -o-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+
+/* line 68, ../src/scss/modules/_home.scss */
+.pie_progress__number {
+  font-size: 24px;
+}
+
+/* line 71, ../src/scss/modules/_home.scss */
+.pie_progress__label {
+  margin-top: 32px;
+  font-size: 12px;
+}
+
+/* line 77, ../src/scss/modules/_home.scss */
 #preloader {
   position: absolute;
   top: 50%;
   left: 50%;
   margin-left: -75px;
   margin-top: -75px;
+}
+
+/* line 86, ../src/scss/modules/_home.scss */
+#info {
+  position: relative;
+  margin: 0 auto -2.1em;
+  top: 0px;
+  width: 550px;
+  padding: 5px;
+  z-index: 100;
+}
+
+/* line 95, ../src/scss/modules/_home.scss */
+#div01 {
+  position: absolute;
+  margin: 0 auto -2.1em;
+  left: 96px;
+  bottom: 192px;
+  width: 100px;
+  padding: 5px;
+  z-index: 100;
+  cursor: pointer;
+  background-color: #000;
+}
+
+/* line 106, ../src/scss/modules/_home.scss */
+#div02 {
+  position: absolute;
+  margin: 0 auto -2.1em;
+  left: 192px;
+  bottom: 192px;
+  width: 100px;
+  padding: 5px;
+  z-index: 100;
+  cursor: pointer;
+  background-color: #000;
+}
+
+/* line 118, ../src/scss/modules/_home.scss */
+.btn {
+  position: absolute;
+  margin: 0 auto -2.1em;
+  bottom: 192px;
+  width: 100px;
+  padding: 5px;
+  z-index: 100;
+  cursor: pointer;
+  background-color: #000;
+}
+
+/* line 130, ../src/scss/modules/_home.scss */
+#console {
+  position: relative;
+  margin: 0 auto -2.1em;
+  top: 0px;
+  width: 550px;
+  padding: 5px;
+  z-index: 100;
+  text-align: left;
+  color: #000;
 }
 
 /*# sourceMappingURL=styles.css.map */

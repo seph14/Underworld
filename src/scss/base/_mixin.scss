@@ -1,6 +1,9 @@
 @mixin sprite-width($sprite) {
   width: strip-unit(nth($sprite, 5)) / 1 * 1px;
-  background-size: 261px 1629px;
+  $width: strip-unit(nth($sprite, 7)) / 1 * 1px;
+  $height: strip-unit(nth($sprite, 8)) / 1 * 1px;
+
+  background-size: $width $height;
 }
 
 @mixin sprite-height($sprite) {

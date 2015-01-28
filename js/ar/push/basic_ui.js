@@ -4,6 +4,10 @@
 var fpsCount;
 var layer01;
 var layer02;
+var head_large;
+var quote_top;
+var darker;
+var preloader;
 
 var view0Layers = [];
 var view1Layers = [];
@@ -16,13 +20,26 @@ function initScene() {
 
 	new PushCore();
 
-	fpsCount = pushCore.addComponent(new PushComponent(document.getElementById("console"),-1));
-	layer01  = pushCore.addComponent(new PushComponent(document.getElementById("div01"),0));
-	layer02  = pushCore.addComponent(new PushComponent(document.getElementById("div02"),1));
+	fpsCount = pushCore.addComponent(new PushComponent(document.getElementById("console"),-99));
+	layer01  = pushCore.addComponent(new PushComponent(document.getElementById("div01"),1));
+	layer02  = pushCore.addComponent(new PushComponent(document.getElementById("div02"),0));
+
+	head_large  = pushCore.addComponent(new PushComponent(document.getElementById("head_large"),-99));
+	head_large.offy = 50;
+	head_large.duration = 1.8;
+
+	quote_top  = pushCore.addComponent(new PushComponent(document.getElementById("quote_top"),-99));
+	quote_top.offy = -20;
+	quote_top.duration = .32;
+
+	darker  = pushCore.addComponent(new PushComponent(document.getElementById("darker"),-99));
+	darker.alpha = .5;
+
+	preloader  = pushCore.addComponent(new PushComponent(document.getElementById("preloader"),-99));
 
 	fpsCount.x 	= 100;
 	layer01.x 	= 80;
-	layer01.x 	= 260;
+	layer02.x 	= 260;
 	//layer01.setBtnID(0);
 
 	for(var i=0; i<0; i++) {
@@ -44,26 +61,26 @@ function initScene() {
 
 function onUpdate() {
 
-	fpsCount.push(pushCore.fps+" fps");
+	//fpsCount.push(pushCore.fps+" fps");
 
 	switch(currentView) {
 		 case 0:
-		 layer01.push("Phase 1");
+		 layer02.push("preloader");
+		 quote_top.push("<p>\“ This is a set of beautiful components which include everything \„</p>");
+		 darker.push("");
+		 preloader.push("");
 
-			for(var i=0; i<view0Layers.length;i++) {
-				view0Layers[i].push("Phase 1 "+i, 1);
-			}
 		 break;
 		 case 1:
-		 layer02.push("Phase 2");
-			for(var i=0; i<view1Layers.length;i++) {
-				view1Layers[i].push("Phase 2 "+i, 0);
-			}
+		 layer01.push("welcome");
+		 head_large.push("");
+		 quote_top.push("<p>\“ This is a set of beautiful components which include everything \„</p>");
+
 		 break;
 	}
 
 	if(Math.random()<.1)
-		$('.pie_progress').asPieProgress('go',layer01.pushValue*100);
+		$('.pie_progress').asPieProgress('go',layer02.pushValue*100);
 
 }
 
@@ -111,6 +128,7 @@ this.onKeyDown = function ( event ) {
 
 			case 49: /*1*/ currentView = 0; break;
 			case 50: /*2*/ currentView = 1; break;
+			case 51: /*2*/ currentView = 2; break;
 
 			case 38: /*up*/
 			case 87: /*W*/ this.moveForward = false; break;

@@ -39,6 +39,12 @@ Math.easeInOutExpo = function (t, b, c, d) {
 	t--;
 	return c/2 * ( -Math.pow( 2, -10 * t) + 2 ) + b;
 };
+Math.easeInExpo = function (t, b, c, d) {
+	return c * Math.pow( 2, 10 * (t/d - 1) ) + b;
+};
+Math.easeOutExpo = function (t, b, c, d) {
+	return c * ( -Math.pow( 2, -10 * t/d ) + 1 ) + b;
+};
 
 PushCore.prototype.btnClick = function(btnID) {
 

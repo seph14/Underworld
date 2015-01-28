@@ -8,7 +8,7 @@ module.exports = function (grunt) {
                 src: 'img.sprite.src/*.png',
                 destImg: '../img/spritesheet.png',
                 destCSS: 'scss/base/_sprites.scss',
-                imgPath: 'img/spritesheet.png'
+                imgPath: '../img/spritesheet.png'
             }
 
         },
