@@ -5,15 +5,15 @@ var coreMat;
 var rockParticle;
 
 var rockConfig = {
-		distThreshold 		: 700,
+		distThreshold 		: 950,
 		// = square distance of click for rock crack
 		rockParticleCnt		: 100000,
 		//maximum particle count
 		terrainLevel		: -600,
 		//average terrain level, TODO: make this little more accurate by doing raycaster
-		dropPercentage		: 0.8,
+		dropPercentage		: 0.6,
 		//how much cracks will be dropping, other than orbiting
-		gravity				: 0.0015,
+		gravity				: 0.0045,
 		//gravity, accerleration for dropping pieces
 		crackOrbitScaler	: 2.5,
 		//crack orbit speed scaler
@@ -602,12 +602,14 @@ function PrepareRockParticle( cnt, scaleMin, scaleMax ){
 
 //TODO: need to compile OBJs into json files for fast loading
 function CreateRock( idx, cnt, scale, pos ){
+	/*
 	var manager = new THREE.LoadingManager();
 	manager.onProgress = function ( item, loaded, total ) { 
 
 		//console.log(item,loaded,total);
 		uiSetProgress(loaded/total*100);
 	};
+	*/
 	
 	var rock = new RockAssemble();
 	rock.pos = pos;

@@ -27,6 +27,8 @@ var cameraControl;
 
 var clock = new THREE.Clock();
 
+var manager;
+
 function initScene() {
 
 	if ( ! Detector.webgl ){
@@ -36,6 +38,13 @@ function initScene() {
 
 	mouse.x = 0;
 	mouse.y = 0;
+
+	manager = new THREE.LoadingManager();
+	manager.onProgress = function ( item, loaded, total ) { 
+
+		//console.log(item,loaded,total);
+		uiSetProgress(loaded/total*100);
+	};
 
 	touchable = is_touch_device();
 	container = document.getElementById( 'viewport' );
