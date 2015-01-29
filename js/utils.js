@@ -1,6 +1,6 @@
 'use strict';
 
-var debug  = true;
+var debug  = false;
 
 function trace( content ){ if(debug){ console.log(content); }    }
 function frac( number )  { return (number - Math.floor(number)); }

@@ -38,32 +38,22 @@ function initUI() {
 	quote_top.duration = .32;
 
 	totale  = pushCore.addComponent(new PushComponent(document.getElementById("totale"),-99));
-	rocktemp  = pushCore.addComponent(new PushComponent(document.getElementById("rocktemp"),-99));
+	//rocktemp  = pushCore.addComponent(new PushComponent(document.getElementById("rocktemp"),-99));
 
 	darker  = pushCore.addComponent(new PushComponent(document.getElementById("darker"),-99));
-	darker.alpha = .9;
+	darker.alpha = .95;
+	darker.pushValue = 1.0;
+	darker.duration = 8.0;
 
 	preloader  = pushCore.addComponent(new PushComponent(document.getElementById("preloader"),-99));
 	preloader.offy = -64;
 	preloader.duration = 0.8;
+	preloader.pushValue = 1.0;
 
 	fpsCount.x 	= 100;
-	btn01.duration = 10;
 	btn01.x 	= 80;
 	btn02.x 	= 260;
 	//btn01.setBtnID(0);
-
-	for(var i=0; i<0; i++) {
-		var newDiv = document.createElement("div");
-		 document.body.appendChild(newDiv);
-		view0btns.push(pushCore.addComponent(new PushComponent(newDiv)));
-	}
-
-	for(var i=0; i<0; i++) {
-		var newDiv = document.createElement("div");
-		 document.body.appendChild(newDiv);
-		view1btns.push(pushCore.addComponent(new PushComponent(newDiv)));
-	}
 
 	pushCore.onUpdate 	= onUpdate;
 	pushCore.onBtnClick = onBtnClick;
@@ -72,7 +62,8 @@ function initUI() {
 
 function uiSetProgress(val) {
 
-	if(val>=100 && currentView==0)	currentView = 1;
+	if(val>=99 && currentView==0) 	currentView = 1;
+
 	if(Math.random()<.91 && currentView==0) {
 		console.log(val);		
 		$('.pie_progress').asPieProgress('go',val);
@@ -86,25 +77,29 @@ function onUpdate() {
 	fpsCount.push(pushCore.fps+" fps");
 
 	 
-	 btn02.push("welcome, humans");
-	 btn03.push("enter the dome");
+	 
 
 	switch(currentView) {
 		 case 0:
 		 //quote_top.push("<p>\“ This is a set of beautiful components which include everything \„</p>");
-		 btn01.push("preloader");
-		 rocktemp.push("");
+		 //btn01.push("preloader");
+		 //rocktemp.push("");
 		 darker.push("");
+		 
 		 preloader.push("");
 
 		 break;
 		 case 1:
 		 //rocktemp.push("");
 		 head_large.push("");
+		 btn02.push("welcome, humans");
+	 	btn03.push("enter the dome");
 		 quote_top.push("<p>\“ This is a set of beautiful components which include everything \„</p>");
 
 		 break;
 		 case 2:
+		 btn02.push("welcome, humans");
+	 	btn03.push("enter the dome");
 		 head_large.push("");
 		 quote_top.push("<p>\“ This is a set of beautiful components which include everything \„</p>");
 

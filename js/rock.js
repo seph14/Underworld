@@ -9,7 +9,7 @@ var rockConfig = {
 		// = square distance of click for rock crack
 		rockParticleCnt		: 100000,
 		//maximum particle count
-		terrainLevel		: -400,
+		terrainLevel		: -600,
 		//average terrain level, TODO: make this little more accurate by doing raycaster
 		dropPercentage		: 0.8,
 		//how much cracks will be dropping, other than orbiting

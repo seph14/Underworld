@@ -199,10 +199,10 @@ function initScene() {
 		LoadTerrainMatEnvMap();
 	}
 	
-	PrepareRockParticle( 15000, 0.05, 0.195 );
+	PrepareRockParticle( 15000, 0.05*10, 0.195*10 );
 
 	LoadTerrain();
-	LoadDummy();
+	//LoadDummy();
 
 	/*
 	for( var i = 0; i < 4; i++ ){
@@ -300,7 +300,7 @@ function animate() {
 	requestAnimationFrame( animate );
 	render();
 	if(pushCore!=null)	pushCore.animate();
-	stats.update();
+	if(debug)	stats.update();
 }
 
 function render() {

@@ -41,7 +41,7 @@ module.exports = function (grunt) {
             sass: {
                 // We watch and compile sass files as normal but don't live reload here
                 files: ['scss/**/*.scss'],
-                tasks: ['compass:dev']
+                tasks: ['compass:dist']
             }
 
         },
@@ -51,7 +51,7 @@ module.exports = function (grunt) {
             },
             all: {
                 files: {
-                    'js/min/main.min.js': ['js/dev/main.js', 'js/dev/spam.js' ]
+                    'js/main.min.js': ['js/control.js', 'js/rock.js' ]
                 }
             }
         }

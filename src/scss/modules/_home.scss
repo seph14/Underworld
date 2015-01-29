@@ -1,4 +1,5 @@
 #darker {
+    pointer-events: none;
     position: absolute;
     background-color: #000;
     width: 100%;
@@ -8,6 +9,8 @@
     opacity: .5;
 }
 #logo{
+    pointer-events: none;
+
     @include sprite($logo);
     @include sprite-center($logo);
     position: absolute;
@@ -18,6 +21,9 @@
  }
 
 #quote_top{
+    pointer-events: none;
+  visibility: hidden;
+
     position: absolute;
     width: 256px;
     margin-left: -128px;
@@ -26,6 +32,9 @@
  }
 
  #head_large{
+    pointer-events: none;
+  visibility: hidden;
+
     @include sprite($head_genesis);
     @include sprite-center($head_genesis);
     position: absolute;
@@ -34,6 +43,8 @@
  }
 
 #social{
+    pointer-events: none;
+
     //display: inline-block;
     @include sprite($social);
     //@include sprite-center($social);
@@ -44,11 +55,14 @@
     padding: 0px;
  }
 #totale {
+  pointer-events: none;
+  visibility: hidden;
     position: absolute;
     left: 0;
     top: 0;
     right: 0;
     bottom: 0;
+    
     background: url(../img/totale.jpg) no-repeat center center fixed; 
   -webkit-background-size: cover;
   -moz-background-size: cover;
@@ -61,7 +75,7 @@
     top: 0;
     right: 0;
     bottom: 0;
-    background: url(../img/rock.jpg) no-repeat center center fixed; 
+    //background: url(../img/rock.jpg) no-repeat center center fixed; 
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
@@ -99,8 +113,9 @@
 
 
 #preloader {
+  visibility: hidden;
 	position: absolute;
-	top:50%;
+	top:70%;
 	left:50%;
 	margin-left: -75px;
 	margin-top: -75px;
@@ -117,11 +132,13 @@
 }
 
 #console {
+  font-size: 8px;
+  text-align: right;
     position: absolute;
     margin: 0 auto -2.1em;
-    bottom: 0px;
-    right: 0px;
-    width: 50px;
+    bottom: 33%;
+    right: 16px;
+    width: 256px;
     padding: 5px;
     z-index:100;
 }
