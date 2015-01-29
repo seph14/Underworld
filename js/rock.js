@@ -543,12 +543,9 @@ function PrepareRockParticle( cnt, scaleMin, scaleMax ){
 		rockParticle.particleMass[i]	= Math.random() * 0.5 + 0.5;
 		
 		//color, random in hsl
-<<<<<<< HEAD
 		//color.setHSL( 0.075, 0.4, 0.24 + 0.3 * Math.random() ); 
 		//TODO: need to come up with a good brown-ish hsl random algorithm
-=======
-		color.setHSL( 0.64, 0.025 + 0.05 * Math.random(), 0.025 + 0.05 * Math.random() ); 
->>>>>>> FETCH_HEAD
+		//color.setHSL( 0.64, 0.025 + 0.05 * Math.random(), 0.025 + 0.05 * Math.random() ); 
 		particleColor[3*i+0] = color.r;
 		particleColor[3*i+1] = color.g;
 		particleColor[3*i+2] = color.b;
