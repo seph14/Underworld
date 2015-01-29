@@ -92,7 +92,8 @@ function LoadTerrainMatLight(){
 }
 
 function LoadTerrainMatEnvMap(){
-	var path = "textures/envmap_terrain/";
+	//var path = "textures/envmap_terrain/";
+	var path = "textures/envmap_blueish/";
 	var format = '.png';
 	var urls = [
 		path + 'px' + format, path + 'nx' + format,

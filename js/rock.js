@@ -444,7 +444,8 @@ function LoadEnvCubeMat( texDiffuse, texNormal ){
 	var shader 	 = THREE.ShaderPBR[ "PBR_Env_Bump" ];
 	var uniforms = THREE.UniformsUtils.clone( shader.uniforms );
 
-	var path = "textures/envmap/";
+	//var path = "textures/envmap/";
+	var path = "textures/envmap_blueish/";
 	var format = '.png';
 	var urls = [
 		path + 'px' + format, path + 'nx' + format,
@@ -525,7 +526,7 @@ function PrepareRockParticle( cnt, scaleMin, scaleMax ){
 	var particleSize 				= new Float32Array( cnt * 1 );
 	//var particleRot 				= new Float32Array( cnt * 1 );
 
-	var color 			= new THREE.Color(0xffffff); //new THREE.Color(0x67535e);
+	var color 			= new THREE.Color(0x000000); //new THREE.Color(0x67535e);
 	
 	for ( var i = 0; i < cnt; i ++ ) {
 		//velocity, default to 0
@@ -540,7 +541,7 @@ function PrepareRockParticle( cnt, scaleMin, scaleMax ){
 		rockParticle.particleMass[i]	= Math.random() * 0.5 + 0.5;
 		
 		//color, random in hsl
-		color.setHSL( 0.075, 0.4, 0.24 + 0.3 * Math.random() ); 
+		//color.setHSL( 0.075, 0.4, 0.24 + 0.3 * Math.random() ); 
 		//TODO: need to come up with a good brown-ish hsl random algorithm
 		particleColor[3*i+0] = color.r;
 		particleColor[3*i+1] = color.g;
