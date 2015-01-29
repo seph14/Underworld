@@ -447,6 +447,7 @@ function LoadEnvCubeMat( texDiffuse, texNormal ){
 	var uniforms = THREE.UniformsUtils.clone( shader.uniforms );
 
 	//var path = "textures/envmap/";
+	//var path = "textures/skydark/";
 	var path = "textures/envmap_blueish/";
 	var format = '.png';
 	var urls = [

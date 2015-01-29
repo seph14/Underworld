@@ -52,11 +52,11 @@ function initScene() {
 	scene 			= new THREE.Scene();
 	sceneCube 		= new THREE.Scene();
 	if( touchable ){
-		scene.fog 		= new THREE.Fog( 0xa29696, 10, FAR/4 );
+		scene.fog 		= new THREE.Fog( 0x8a8b96, 10, FAR/4 );
 		sceneCube.fog 	= new THREE.Fog( 0xbcafa7, 10, FAR/4 );
 	}else{
-		scene.fog 		= new THREE.FogExp2( 0xa29696, 0.0009 );
-		sceneCube.fog 	= new THREE.FogExp2( 0xbcafa7, 0.0007 );
+		scene.fog 		= new THREE.FogExp2( 0x8a8b96, 0.0009 );
+		sceneCube.fog 	= new THREE.FogExp2( 0x9696a2, 0.0007 );
 	}
 	
 	// CAMERA
@@ -222,9 +222,9 @@ function initScene() {
 	}
 
 	//EVENTS
-	document.addEventListener(  touchable ? 'touchmove'  : 'mousemove',  
+	document.addEventListener( touchable ? 'touchmove'  : 'mousemove',  
 											 onDocumentMouseMove,  false );
-	container.addEventListener( touchable ? 'touchstart' : 'click', 	 
+	document.addEventListener( touchable ? 'touchstart' : 'click', 	 
 											 onDocumentMouseDown,  false );
 	window.addEventListener  ( 'resize',     onWindowResize,       false );
 	window.addEventListener  ( 'keydown',    onKeyDown,            false ); 
