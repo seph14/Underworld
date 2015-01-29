@@ -6,9 +6,7 @@ var WIDTH = window.innerWidth || 2;
 var HEIGHT = window.innerHeight || ( 2 + 2 * MARGIN );
 var SCREEN_WIDTH  = window.innerWidth;
 var	SCREEN_HEIGHT = window.innerHeight - 2 * MARGIN;
-//var SCREEN_WIDTH = WIDTH;
-//var SCREEN_HEIGHT = HEIGHT - 2 * MARGIN;
-var FAR  = 10000;
+var FAR  = 5000;
 var NEAR = 1;
 var touchable;
 
@@ -41,7 +39,7 @@ function initScene() {
 
 	touchable = is_touch_device();
 	container = document.getElementById( 'viewport' );
-			
+	
 	if(debug){
 		stats = new Stats();
 		stats.domElement.style.position = 'absolute';
@@ -53,9 +51,14 @@ function initScene() {
 	// SCENE
 	scene 			= new THREE.Scene();
 	sceneCube 		= new THREE.Scene();
-	scene.fog 		= new THREE.FogExp2( 0xccc9c2, 0.0011 );
-	sceneCube.fog 	= new THREE.FogExp2( 0xccc9c2, 0.0007 );
-
+	if( touchable ){
+		scene.fog 		= new THREE.Fog( 0xa29696, 10, FAR/4 );
+		sceneCube.fog 	= new THREE.Fog( 0xbcafa7, 10, FAR/4 );
+	}else{
+		scene.fog 		= new THREE.FogExp2( 0xa29696, 0.0009 );
+		sceneCube.fog 	= new THREE.FogExp2( 0xbcafa7, 0.0007 );
+	}
+	
 	// CAMERA
 	camera = new THREE.PerspectiveCamera( 60, SCREEN_WIDTH / SCREEN_HEIGHT, NEAR, FAR );
 	camera.position.set( -144.52, -394.97, -289.79 );
@@ -134,26 +137,9 @@ function initScene() {
 	renderer.gammaInput = true;
 	renderer.gammaOutput = true;
 
-	//
-	/*
-	camControl = new THREE.OrbitControls( camera, renderer.domElement );
-	camControl.target.set( 0, 0, 0 );
-
-	camControl.rotateSpeed = 1.0;
-	camControl.zoomSpeed = 1.2;
-	camControl.panSpeed = 0.8;
-
-	camControl.noZoom = false;
-	camControl.noPan = false;
-
-	camControl.staticMoving = true;
-	camControl.dynamicDampingFactor = 0.15;
-	camControl.keys = [ 65, 83, 68 ];
-	*/
-
 
 	//skybox
-	var path = "textures/skydark/";
+	/*var path = "textures/skydark/";
 	var format = '.jpg';
 	var urls = [
 				path + 'px' + format, path + 'nx' + format,
@@ -174,7 +160,7 @@ function initScene() {
 	} );
 
 	skyMesh = new THREE.Mesh( new THREE.BoxGeometry( FAR, FAR, FAR ), material );
-	sceneCube.add( skyMesh );		
+	sceneCube.add( skyMesh );*/
 
 	// COMPOSER
 
@@ -197,6 +183,7 @@ function initScene() {
 	//composer.addPass( renderSky   );
 	composer.addPass( renderModel );
 	composer.addPass( effectFXAA );
+	onWindowResize();
 	
 	if( debug ){
 		CreateRockGUI();
@@ -212,7 +199,7 @@ function initScene() {
 		LoadTerrainMatEnvMap();
 	}
 	
-	PrepareRockParticle( 15000, 0.05, 0.075 );
+	PrepareRockParticle( 15000, 0.05, 0.195 );
 
 	LoadTerrain();
 	LoadDummy();
@@ -242,10 +229,6 @@ function initScene() {
 	window.addEventListener  ( 'resize',     onWindowResize,       false );
 	window.addEventListener  ( 'keydown',    onKeyDown,            false ); 
 
-	//if(touchable){
-		onWindowResize();
-	//}
-
 	clock.start();
 
 	animate();
@@ -264,17 +247,16 @@ function onWindowResize() {
 	renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
 	composer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
 
-	if( touchable ){
-		//this 0.5 should be 1.0 / scale 
-		//so for iphone6plus this should be 0.33?
-		//need to test though
-		effectFXAA.uniforms[ 'resolution' ]
-		.value.set( 0.5 / SCREEN_WIDTH, 0.5 / SCREEN_HEIGHT );
+	//update with
+	//window.devicePixelRatio
+	//for retina screens
 
-	}else{
-		effectFXAA.uniforms[ 'resolution' ]
-		.value.set( 1 / SCREEN_WIDTH, 1 / SCREEN_HEIGHT );
-	}
+	//this 0.5 should be 1.0 / scale 
+	//so for iphone6plus this should be 0.33?
+	//need to test though
+	effectFXAA.uniforms[ 'resolution' ]
+		.value.set( 1 / (SCREEN_WIDTH  * window.devicePixelRatio), 
+					1 / (SCREEN_HEIGHT * window.devicePixelRatio) );
 }
 
 function onKeyDown( event ){
@@ -335,18 +317,7 @@ function render() {
 	var t = 5 * clock.getElapsedTime ();
 	rockParticle.update( rocks[3].scaler, t );
 
-	/*
-	if( rocks.length > 4 ){
-		var pos = rocks[3].pos;
-		var p   = new THREE.Vector3;
-		p.x     = rocks[3].pos.x;
-		p.y     = rocks[3].pos.y + 280;
-		p.z     = rocks[3].pos.z;
-		camera.lookAt( p ); //not working???
-	}*/
-
-	// camera.position.set( -144.52, -394.97, -289.79 );
-	
+	// camera.position.set( -144.52, -394.97, -289.79 );	
 	var targetX = -223+mouse.x*20;
 	var targetZ = -290+mouse.x*20;
 	var targetY = -392+mouse.y*2;
@@ -359,8 +330,7 @@ function render() {
 	//sunLight.position.set( mouse.x*2000, mouse.y*2000, 0 );
 
 	var delta = clock.getDelta();
-
-            fpsControl.update(delta);
+	fpsControl.update(delta);
 
 	var op = "<tt>";
 	op+= camera.position.x+"<br>";

@@ -167,8 +167,9 @@ RockCrack.prototype.collide = function( position, crack ){
 		var p = new THREE.Vector3( cx/2.0 + position.x, 
 								   cy/2.0 + position.y * this.type, 
 								   cz/2.0 + position.z );
-		rockParticle.drop( p, this.pos, Math.floor(rockConfig.particleDroprate + 
-												   rockConfig.particleDroprate * Math.random()) );
+		rockParticle.drop( p, this.pos, 
+			Math.floor( rockConfig.particleDroprate + 
+						rockConfig.particleDroprate * Math.random()) );
 
 		if( crack.mode < 1 )
 			this.collision 		*= 0.9;
@@ -204,11 +205,12 @@ RockCrack.prototype.detach = function( outburst, level ){
 	if( this.mode >= 1.0 || this.mode < 0.0 ) return;
 	this.mode 	= 1.0;
 	if(outburst){
-		this.pos.multiplyScalar( 0.5 + Math.random() * 0.7 );		
+		//this.pos.multiplyScalar( 0.5 + Math.random() * 0.7 );		
 		this.rotSpeed *= 1.0 + Math.random();
-	}else{
-		this.pos.multiplyScalar( 0.2 + Math.random() * 0.8 );		
 	}
+	//}else{
+		//this.pos.multiplyScalar( 0.2 + Math.random() * 0.8 );		
+	//}
 
 	if( this.type == 0 ){
 		this.pos.y 	 += level;
@@ -373,9 +375,9 @@ RockParticle.prototype.update = function( scaler, elapsedTime ) {
 	if( this.enabled ){
 		this.particleCloud.geometry.addAttribute( 'position', 	
 			new THREE.BufferAttribute( this.particlePosition, 3 ) );
-		this.particleCloud.geometry.computeBoundingSphere();
+		//this.particleCloud.geometry.computeBoundingSphere();
 		//maybe we don't need this, just manually set visible every frame?
-		//this.particleCloud.material.uniforms.uTime.value = elapsedTime;
+		this.particleCloud.material.uniforms.uTime.value = elapsedTime;
 	}
 
 	this.particleCloud.visible = this.enabled;
@@ -434,7 +436,7 @@ function LoadLightMat( texDiffuse, texNormal ){
 					       fog: 			true,
 					       morphTargets:    false,
 					       morphNormals:    false,
-					       shading: 		THREE.SmoothShading };
+					       shading: 		THREE.FlatShading };
 	coreMat = new THREE.ShaderMaterial( parametersmono );
 
 	return rockMat;
@@ -474,7 +476,7 @@ function LoadEnvCubeMat( texDiffuse, texNormal ){
 	uniforms[ "uExposure"  ].value    		= 6.3375;
 	uniforms[ "uGamma" 	   ].value    		= 2.2;			
 	
-	uniforms[ "uBaseColor"].value     		= new THREE.Color( 0x251a22 );		
+	uniforms[ "uBaseColor"].value     		= new THREE.Color( 0x1d1b1c );		
 		
 	var parameters = { fragmentShader: 	shader.fragmentShader, 
 					   vertexShader: 	shader.vertexShader, 
@@ -524,7 +526,7 @@ function PrepareRockParticle( cnt, scaleMin, scaleMax ){
 	
 	var particleColor 				= new Float32Array( cnt * 3 );
 	var particleSize 				= new Float32Array( cnt * 1 );
-	//var particleRot 				= new Float32Array( cnt * 1 );
+	var particleRot 				= new Float32Array( cnt * 1 );
 
 	var color 			= new THREE.Color(0x000000); //new THREE.Color(0x67535e);
 	
@@ -535,14 +537,18 @@ function PrepareRockParticle( cnt, scaleMin, scaleMax ){
 		rockParticle.particleVelocity[3*i+2] = 0;
 		//position, default below terrain
 		rockParticle.particlePosition[3*i+0] = 0;
-		rockParticle.particlePosition[3*i+1] = -800; //make it beneath terrain
+		rockParticle.particlePosition[3*i+1] = rockConfig.terrainLevel - 1; //make it beneath terrain
 		rockParticle.particlePosition[3*i+2] = 0;
 		//mass, randomize
 		rockParticle.particleMass[i]	= Math.random() * 0.5 + 0.5;
 		
 		//color, random in hsl
+<<<<<<< HEAD
 		//color.setHSL( 0.075, 0.4, 0.24 + 0.3 * Math.random() ); 
 		//TODO: need to come up with a good brown-ish hsl random algorithm
+=======
+		color.setHSL( 0.64, 0.025 + 0.05 * Math.random(), 0.025 + 0.05 * Math.random() ); 
+>>>>>>> FETCH_HEAD
 		particleColor[3*i+0] = color.r;
 		particleColor[3*i+1] = color.g;
 		particleColor[3*i+2] = color.b;
@@ -551,28 +557,28 @@ function PrepareRockParticle( cnt, scaleMin, scaleMax ){
 		particleSize[i]	  = scaleMin + Math.random() * (scaleMax - scaleMin);
 		
 		//rotation, randomize 
-		//particleRot[i]	  = 2 * Math.PI * Math.random();
+		particleRot[i]	  = 2 * Math.PI * Math.random();
 	}
 
 	geometry.addAttribute( 'position', 	
 		new THREE.BufferAttribute( rockParticle.particlePosition, 	3 ) );
-	//geometry.addAttribute( 'rotation', 		
-	//	new THREE.BufferAttribute( particleRot, 	  				1 ) );
+	geometry.addAttribute( 'rotation', 		
+		new THREE.BufferAttribute( particleRot, 	  				1 ) );
 	geometry.addAttribute( 'pcolor', 	
 		new THREE.BufferAttribute( particleColor,    				3 ) );
 	geometry.addAttribute( 'size', 		
 		new THREE.BufferAttribute( particleSize, 	 				1 ) );
 	geometry.computeBoundingSphere();
 
-	//var shader 	 = THREE.ShaderParticle[ "Particle" ];
-	var shader 	 = THREE.ShaderParticle[ "Particle_Simple" ];
+	var shader 	 = THREE.ShaderParticle[ "Particle" ];
+	//var shader 	 = THREE.ShaderParticle[ "Particle_Simple" ];
 	var uniforms = THREE.UniformsUtils.clone( shader.uniforms );
 
-	//uniforms[ "uBaseColorMap" ].value 	= THREE.ImageUtils.loadTexture( "textures/rock_particle.png" );
-	//uniforms[ "uTime" 	   ].value    	= 0.0;
+	uniforms[ "uBaseColorMap" ].value 	= THREE.ImageUtils.loadTexture( "textures/rock_particle.png" );
+	uniforms[ "uTime" 	   ].value    	= 0.0;
 	
 	var attributes = {
-		//rotation:   { type: 'f', value: [] },
+		rotation:   { type: 'f', value: [] },
 		size:   	{ type: 'f', value: [] },
 		pcolor: 	{ type: 'c', value: [] }
 	};
@@ -584,8 +590,8 @@ function PrepareRockParticle( cnt, scaleMin, scaleMax ){
 					    fog: 			true,
 					    blending: 		THREE.NormalBlending,
 					    depthWrite: 	false,
-					    depthTest: 		true//,
-					    //transparent: 	true 
+					    depthTest: 		true,
+					    transparent: 	true 
 					};
 	var material 	= new THREE.ShaderMaterial( parameters );
 
@@ -595,38 +601,6 @@ function PrepareRockParticle( cnt, scaleMin, scaleMax ){
 
 	scene.add( rockParticle.particleCloud );
 }
-
-//deprecated, using point cloud instead
-/*function LoadRockParticle( cnt, max, scaleMin, scaleMax ){
-	//temp meshes - need simpler ones
-	var manager = new THREE.LoadingManager();
-	manager.onProgress = function ( item, loaded, total ) { };
-	var loader = new THREE.OBJLoader( manager );
-
-	var onProgress 	= function ( xhr ) { };
-	var onError 	= function ( xhr ) { trace("file not found"); };
-	var matrix 		= new THREE.Matrix4;
-
-	var root = "models/RockHollow" + 0 + "/Rock";
-	for (var i = 1; i <= cnt; i++) {
-		var str = root + Math.floor(max * Math.random()) + ".obj";
-		loader.load( str, function ( object ) {
-			object.traverse( function ( child ) {
-				if ( child instanceof THREE.Mesh ) {
-					child.material = rockMat;
-					var scale = scaleMin + Math.random() * (scaleMax - scaleMin);	
-					matrix.makeScale(scale, scale, scale);
-					child.geometry.applyMatrix(matrix);
-					child.geometry.computeBoundingBox ();
-					var center = child.geometry.boundingBox.center();
-					child.geometry.applyMatrix( 
-						new THREE.Matrix4().makeTranslation( - center.x, - center.y, - center.z ) );
-					particleMesh.push(child);	
-				}
-			});
-		}, onProgress, onError );
-	}
-}*/
 
 //TODO: need to compile OBJs into json files for fast loading
 function CreateRock( idx, cnt, scale, pos ){
@@ -656,10 +630,6 @@ function CreateRock( idx, cnt, scale, pos ){
 		loader.load( str, function ( object ) {
 			object.traverse( function ( child ) {
 				if ( child instanceof THREE.Mesh ) {
-					//console.log( i + ": " + child.geometry.attributes.position.array.length + "," +
-					//			 child.geometry.attributes.normal.array.length + "," + 
-					//			 child.geometry.attributes.uv.array.length );
-					//if( child.geometry.attributes.position.array.length > 0 ){
 					child.material = rockMat;				
 					child.geometry.applyMatrix(matrix);
 					child.geometry.computeBoundingBox ();
@@ -696,8 +666,6 @@ function CreateRock( idx, cnt, scale, pos ){
 					rock.crackMesh.push(child);
 					rock.crack.push(crack);
 					scene.add(child);
-
-					//}
 				}
 			} );
 		}, onProgress, onError );

@@ -24,7 +24,7 @@ function LoadTerrainMatLight(){
 	uniforms[ "uExposure"  ].value    	= 6.3375;
 	uniforms[ "uGamma" 	   ].value    	= 2.2;
 			
-	uniforms[ "uBaseColor"].value     	= new THREE.Color( 0x413e3c );
+	uniforms[ "uBaseColor"].value     	= new THREE.Color( 0x09090b );
 	
 	var parameters = { fragmentShader: 	shader.fragmentShader, 
 					   vertexShader: 	shader.vertexShader, 
@@ -56,7 +56,7 @@ function LoadTerrainMatLight(){
 	uniforms[ "uExposure"  ].value    	= 6.3375;
 	uniforms[ "uGamma" 	   ].value    	= 2.2;
 			
-	uniforms[ "uBaseColor"].value     	= new THREE.Color( 0x413e3c );
+	uniforms[ "uBaseColor"].value     	= new THREE.Color( 0x09090b );
 
 	var parametersD 	= { fragmentShader: shader.fragmentShader, 
 						   vertexShader: 	shader.vertexShader, 
@@ -125,7 +125,7 @@ function LoadTerrainMatEnvMap(){
 	uniforms[ "uExposure"  ].value    	= 6.3375;
 	uniforms[ "uGamma" 	   ].value    	= 2.2;
 			
-	uniforms[ "uBaseColor"].value     	= new THREE.Color( 0x26171a );
+	uniforms[ "uBaseColor"].value     	= new THREE.Color( 0x09090b );
 	
 	var parameters = { fragmentShader: 	shader.fragmentShader, 
 					   vertexShader: 	shader.vertexShader, 
@@ -159,7 +159,7 @@ function LoadTerrainMatEnvMap(){
 	uniforms[ "uExposure"  ].value    	= 6.3375;
 	uniforms[ "uGamma" 	   ].value    	= 2.2;
 			
-	uniforms[ "uBaseColor"].value     	= new THREE.Color( 0x26171a );
+	uniforms[ "uBaseColor"].value     	= new THREE.Color( 0x09090b );
 
 	var parametersD 	= { fragmentShader: shader.fragmentShader, 
 						   vertexShader: 	shader.vertexShader, 
