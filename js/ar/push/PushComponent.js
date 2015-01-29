@@ -8,6 +8,7 @@ var PushComponent = function (domElement, btnID) {
 
 	this.domElement = domElement;
 	this.pushValue = 0;
+	this.lastPushValue = -1;
 
 	this.btnID = btnID;
 
@@ -28,6 +29,7 @@ var PushComponent = function (domElement, btnID) {
 
 	this.x = $(this.domElement).offset().left;
 	this.y = $(this.domElement).offset().top;
+	this.y = parseInt($(this.domElement).css('marginTop'));
 
 	this.offx = 0;
 	this.offy = 0;
@@ -91,7 +93,13 @@ PushComponent.prototype.update = function() {
 			//offset.top = pushValueOutExpo*this.offy+this.y;
 	}
 
-	$(this.domElement).offset({ top: offset.top})
-	//this.domElement.innerHTML = this.pushMode+" / "+Math.round(this.pushValue*100)+"% "+this.value;
-	if(this.value!="")	this.domElement.innerHTML = "<tt>"+this.value+"</tt>";
+	if(this.lastPushValue!=this.pushValue) {
+		//$(this.domElement).offset({ top: offset.top});
+		 $(this.domElement).css({ 'margin-top': offset.top+'px' }); 
+		//this.domElement.innerHTML = this.pushMode+" / "+Math.round(this.pushValue*100)+"% "+this.value;
+		if(this.value!="")	this.domElement.innerHTML = "<tt>"+this.value+"</tt>";
+	}
+
+	this.lastPushValue = this.pushValue;
+
 };

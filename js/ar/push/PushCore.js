@@ -22,7 +22,7 @@ var PushCore = function () {
 
 	this.console 	= document.getElementById("console");
 	
-	this.update();
+	//this.update();
 	//return this;
 
 }
@@ -53,6 +53,11 @@ PushCore.prototype.btnClick = function(btnID) {
 }
 
 PushCore.prototype.deltaTime = 0.02;
+
+PushCore.prototype.animate = function() {
+		//console.log("PushCore.animate");
+		this.update();
+}
 PushCore.prototype.update = function() {
 	//console.log("PushCore.render");
 
@@ -70,7 +75,7 @@ PushCore.prototype.update = function() {
 
 	if(pushCore.onUpdate!=null)	pushCore.onUpdate();
 
-	requestAnimFrame(pushCore.update);
+	//requestAnimFrame(pushCore.update);
 
 }
 
@@ -82,12 +87,8 @@ PushCore.prototype.addComponent = function(object) {
 };
 
 
+
 /*
-
-
-
-*/
-
 window.requestAnimFrame = (function(){
   return  window.requestAnimationFrame       ||
           window.webkitRequestAnimationFrame ||
@@ -96,3 +97,4 @@ window.requestAnimFrame = (function(){
             window.setTimeout(callback, 1000 / 60);
           };
 })();
+*/

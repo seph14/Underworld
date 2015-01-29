@@ -245,14 +245,15 @@ a#open-about {
   height: 100%;
   top: 0;
   left: 0;
+  opacity: .5;
 }
 
-/* line 9, ../src/scss/modules/_home.scss */
+/* line 10, ../src/scss/modules/_home.scss */
 #logo {
   background-image: url(../img/spritesheet.png);
   background-position: 0px 0px;
   width: 119px;
-  background-size: 450px 123px;
+  background-size: 450px 450px;
   height: 13px;
   top: 50%;
   left: 50%;
@@ -265,7 +266,7 @@ a#open-about {
   padding: 0px;
 }
 
-/* line 19, ../src/scss/modules/_home.scss */
+/* line 20, ../src/scss/modules/_home.scss */
 #quote_top {
   position: absolute;
   width: 256px;
@@ -274,28 +275,28 @@ a#open-about {
   left: 50%;
 }
 
-/* line 27, ../src/scss/modules/_home.scss */
+/* line 28, ../src/scss/modules/_home.scss */
 #head_large {
   background-image: url(../img/spritesheet.png);
-  background-position: 0px -37px;
-  width: 450px;
-  background-size: 450px 123px;
-  height: 38px;
+  background-position: 0px -271px;
+  width: 437px;
+  background-size: 450px 450px;
+  height: 179px;
   top: 50%;
   left: 50%;
-  margin-left: -225px;
-  margin-top: -19px;
+  margin-left: -218.5px;
+  margin-top: -89.5px;
   position: absolute;
-  top: 128px;
+  top: 192px;
   left: 50%;
 }
 
-/* line 35, ../src/scss/modules/_home.scss */
+/* line 36, ../src/scss/modules/_home.scss */
 #social {
   background-image: url(../img/spritesheet.png);
   background-position: 0px -75px;
   width: 146px;
-  background-size: 450px 123px;
+  background-size: 450px 450px;
   height: 48px;
   position: absolute;
   top: 20px;
@@ -304,7 +305,7 @@ a#open-about {
   padding: 0px;
 }
 
-/* line 45, ../src/scss/modules/_home.scss */
+/* line 46, ../src/scss/modules/_home.scss */
 #totale {
   position: absolute;
   left: 0;
@@ -318,7 +319,7 @@ a#open-about {
   background-size: cover;
 }
 
-/* line 57, ../src/scss/modules/_home.scss */
+/* line 58, ../src/scss/modules/_home.scss */
 #rocktemp {
   position: absolute;
   left: 0;
@@ -332,7 +333,7 @@ a#open-about {
   background-size: cover;
 }
 
-/* line 69, ../src/scss/modules/_home.scss */
+/* line 70, ../src/scss/modules/_home.scss */
 .pie_progress {
   text-align: center;
   position: relative;
@@ -340,12 +341,12 @@ a#open-about {
   transform-style: preserve-3d;
 }
 
-/* line 75, ../src/scss/modules/_home.scss */
+/* line 76, ../src/scss/modules/_home.scss */
 .pie_progress svg {
   margin: 0 auto;
 }
 
-/* line 78, ../src/scss/modules/_home.scss */
+/* line 79, ../src/scss/modules/_home.scss */
 .pie_progress__content,
 .pie_progress__number,
 .pie_progress__label,
@@ -360,18 +361,18 @@ a#open-about {
   transform: translateY(-50%);
 }
 
-/* line 91, ../src/scss/modules/_home.scss */
+/* line 92, ../src/scss/modules/_home.scss */
 .pie_progress__number {
   font-size: 24px;
 }
 
-/* line 94, ../src/scss/modules/_home.scss */
+/* line 95, ../src/scss/modules/_home.scss */
 .pie_progress__label {
   margin-top: 32px;
   font-size: 12px;
 }
 
-/* line 100, ../src/scss/modules/_home.scss */
+/* line 101, ../src/scss/modules/_home.scss */
 #preloader {
   position: absolute;
   top: 50%;
@@ -380,7 +381,7 @@ a#open-about {
   margin-top: -75px;
 }
 
-/* line 109, ../src/scss/modules/_home.scss */
+/* line 110, ../src/scss/modules/_home.scss */
 #info {
   position: relative;
   margin: 0 auto -2.1em;
@@ -390,7 +391,7 @@ a#open-about {
   z-index: 100;
 }
 
-/* line 118, ../src/scss/modules/_home.scss */
+/* line 119, ../src/scss/modules/_home.scss */
 #console {
   position: absolute;
   margin: 0 auto -2.1em;
@@ -401,22 +402,22 @@ a#open-about {
   z-index: 100;
 }
 
-/* line 128, ../src/scss/modules/_home.scss */
+/* line 129, ../src/scss/modules/_home.scss */
 #btn01 {
   left: 96px;
 }
 
-/* line 131, ../src/scss/modules/_home.scss */
+/* line 132, ../src/scss/modules/_home.scss */
 #btn02 {
   left: 256px;
 }
 
-/* line 134, ../src/scss/modules/_home.scss */
+/* line 135, ../src/scss/modules/_home.scss */
 #btn03 {
   left: 420px;
 }
 
-/* line 138, ../src/scss/modules/_home.scss */
+/* line 139, ../src/scss/modules/_home.scss */
 .btn {
   font-size: 6.25px;
   font-size: 0.625rem;

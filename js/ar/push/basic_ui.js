@@ -17,9 +17,9 @@ var view1btns = [];
 
 var currentView = 0;
 
-function initScene() {
+function initUI() {
 
-	console.log("basic_ui.initScene");
+	console.log("basic_ui.initUI");
 
 	new PushCore();
 
@@ -41,13 +41,14 @@ function initScene() {
 	rocktemp  = pushCore.addComponent(new PushComponent(document.getElementById("rocktemp"),-99));
 
 	darker  = pushCore.addComponent(new PushComponent(document.getElementById("darker"),-99));
-	darker.alpha = .5;
+	darker.alpha = .9;
 
 	preloader  = pushCore.addComponent(new PushComponent(document.getElementById("preloader"),-99));
 	preloader.offy = -64;
 	preloader.duration = 0.8;
 
 	fpsCount.x 	= 100;
+	btn01.duration = 10;
 	btn01.x 	= 80;
 	btn02.x 	= 260;
 	//btn01.setBtnID(0);
@@ -69,23 +70,36 @@ function initScene() {
 
 }
 
+function uiSetProgress(val) {
+
+	if(val>=100 && currentView==0)	currentView = 1;
+	if(Math.random()<.91 && currentView==0) {
+		console.log(val);		
+		$('.pie_progress').asPieProgress('go',val);
+	}
+
+
+}
+
 function onUpdate() {
 
 	fpsCount.push(pushCore.fps+" fps");
 
-	 btn01.push("preloader");
+	 
 	 btn02.push("welcome, humans");
 	 btn03.push("enter the dome");
 
 	switch(currentView) {
 		 case 0:
-		 quote_top.push("<p>\“ This is a set of beautiful components which include everything \„</p>");
+		 //quote_top.push("<p>\“ This is a set of beautiful components which include everything \„</p>");
+		 btn01.push("preloader");
+		 rocktemp.push("");
 		 darker.push("");
 		 preloader.push("");
 
 		 break;
 		 case 1:
-		 rocktemp.push("");
+		 //rocktemp.push("");
 		 head_large.push("");
 		 quote_top.push("<p>\“ This is a set of beautiful components which include everything \„</p>");
 
@@ -99,8 +113,6 @@ function onUpdate() {
 		 break;
 	}
 
-	if(Math.random()<.1)
-		$('.pie_progress').asPieProgress('go',btn01.pushValue*100);
 
 }
 
@@ -184,4 +196,4 @@ this.onKeyDown = function ( event ) {
 
 	};
 
-window.onload = initScene;
+//window.onload = initScene;
