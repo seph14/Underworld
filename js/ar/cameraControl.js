@@ -71,7 +71,6 @@ AR.CameraControl = function ( object, domElement ) {
 		camera.lookAt(target);
 	}
 
-
 	this.onKeyDown = function ( event ) {
 
 		//event.preventDefault();
@@ -133,7 +132,7 @@ AR.CameraControl = function ( object, domElement ) {
 
 	};
 
-
+/*
 	window.addEventListener( 'keydown', bind( this, this.onKeyDown ), false );
 	window.addEventListener( 'keyup', bind( this, this.onKeyUp ), false );
 
@@ -146,5 +145,6 @@ AR.CameraControl = function ( object, domElement ) {
 		};
 
 	};
+	*/
 
 };

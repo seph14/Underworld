@@ -599,7 +599,11 @@ function PrepareRockParticle( cnt, scaleMin, scaleMax ){
 //TODO: need to compile OBJs into json files for fast loading
 function CreateRock( idx, cnt, scale, pos ){
 	var manager = new THREE.LoadingManager();
-	manager.onProgress = function ( item, loaded, total ) { };
+	manager.onProgress = function ( item, loaded, total ) { 
+
+		//console.log(item,loaded,total);
+		uiSetProgress(loaded/total*100);
+	};
 	
 	var rock = new RockAssemble();
 	rock.pos = pos;

@@ -105,7 +105,7 @@ function initScene() {
 	scene.add( sunLight );
 
 	if( USELIGHTS ){
-		var light = new THREE.DirectionalLight( 0x92798c, 0.4 );
+		var light = new THREE.DirectionalLight( 0x33222f, 0.4 );
 		light.position.set( 0, -200, 0 );
 		light.target.position.set(  0, 0, 0 );
 		scene.add( light );
@@ -299,6 +299,7 @@ function onDocumentMouseMove( event ) {
 function animate() {
 	requestAnimationFrame( animate );
 	render();
+	if(pushCore!=null)	pushCore.animate();
 	stats.update();
 }
 
@@ -326,6 +327,8 @@ function render() {
 	
 	cameraControl.setCameraTargetPos(0,targetX,targetY,targetZ);
 
+	//sunLight.position.set( mouse.x*2000, mouse.y*2000, 0 );
+
 	var delta = clock.getDelta();
 	fpsControl.update(delta);
 
@@ -334,6 +337,9 @@ function render() {
 	op+= camera.position.y+"<br>";
 	op+= camera.position.z+"<br>";
 	op+= rocks[3].scaler+"<br>";
+	op+= sunLight.position.x+"<br>";
+	op+= sunLight.position.y+"<br>";
+	op+= sunLight.position.z+"<br>";
 	op+= "</tt>";
 	document.getElementById("console").innerHTML = ""+op;
 
@@ -358,4 +364,7 @@ function render() {
 	//composer.render( 0.1 );
 }
 
-window.onload = initScene;
+window.onload = function() {
+	initScene();
+	initUI();
+}

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Shading Test</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	
+		<link rel="stylesheet" href="css/styles.css">
+
+	<style>
+		body {
+			color: #fff;
+			font-family: Avenir;
+			font-size: 13px;
+			text-align: center;
+			font-weight: bold;
+
+			-webkit-touch-callout: 	none;
+    		-webkit-user-select: 	none;
+    		-khtml-user-select: 	none;
+    		-moz-user-select: 		none;
+    		-ms-user-select: 		none;
+    		user-select: 			none;
+
+			background-color: #bababa;
+			margin: 0px;
+			overflow: hidden;
+		}
+
+		a { color: skyblue; }
+
+		#stats #fps { background: transparent !important }
+		#stats #fps #fpsText { color: #444 !important }
+		#stats #fps #fpsGraph { display: none }
+	</style>
+	<script type="text/javascript" src="framework/three.js"></script>
+	<script type="text/javascript" src="framework/stats.js"></script>
+	
+	<script type="text/javascript" src="framework/ThreeJS_Lib/shaders/CopyShader.js"></script>
+	<script type="text/javascript" src="framework/ThreeJS_Lib/shaders/FXAAShader.js"></script>
+	
+	<script type="text/javascript" src="framework/ThreeJS_Lib/postprocessing/EffectComposer.js"></script>
+	<script type="text/javascript" src="framework/ThreeJS_Lib/postprocessing/RenderPass.js"></script>
+	<script type="text/javascript" src="framework/ThreeJS_Lib/postprocessing/BloomPass.js"></script>
+	<script type="text/javascript" src="framework/ThreeJS_Lib/postprocessing/ShaderPass.js"></script>
+	<script type="text/javascript" src="framework/ThreeJS_Lib/postprocessing/MaskPass.js"></script>
+	<script type="text/javascript" src="framework/ThreeJS_Lib/postprocessing/SavePass.js"></script>
+
+	<script type="text/javascript" src="framework/ThreeJS_Lib/controls/TrackballControls.js"></script>
+	<script type="text/javascript" src="framework/ThreeJS_Lib/controls/OrbitControls.js"></script>
+	<script type="text/javascript" src="framework/ThreeJS_Lib/controls/FirstPersonControls.js"></script>
+	<script type="text/javascript" src="framework/ThreeJS_Lib/Detector.js"></script>
+	<script type="text/javascript" src='framework/ThreeJS_Lib/libs/dat.gui.min.js'></script>
+
+	<script type="text/javascript" src="framework/ThreeJS_Lib/loaders/OBJLoader.js"></script>
+	<script type="text/javascript" src="framework/simplex-noise.js"></script>
+
+	<script type="text/javascript" src="js/shaders/PBR.js"></script>
+	<script type="text/javascript" src="js/shaders/Particle.js"></script>
+
+	<script type="text/javascript" src="js/control.js"></script>
+	<script type="text/javascript" src="js/base.js"></script>
+	<script type="text/javascript" src="js/rock.js"></script>
+	<script type="text/javascript" src="js/utils.js"></script>
+
+	<script type="text/javascript" src="js/TweenMax.min.js"></script>
+
+	<script type="text/javascript" src="js/ar/cameraControl.js"></script>
+
+
+	<script type="text/javascript" src="js/ar/push/PushCore.js"></script>
+	<script type="text/javascript" src="js/ar/push/PushComponent.js"></script>
+	<script type="text/javascript" src="js/ar/push/basic_ui.js"></script>
+
+	<script type="text/javascript" src="js/jquery-2.1.3.min.js"></script>
+    <script type="text/javascript" src="js/jquery-asPieProgress.js"></script>
+
+</head>
+
+<body>	
+	<div id="viewport"></div>
+	<div id="console"><tt>console</tt></div>
+
+	<div id="rocktemp"></div>
+	<div id="totale"></div>
+	<div id="darker"></div>
+
+	<div id="quote_top">“ This is a set of beautiful components
+which include everything „</div>
+	<div id="head_large"></div>
+	<div id="logo"></div>
+	<div id="social"></div>
+	<div id="btn01" class="btn"><tt>console</tt></div>
+	<div id="btn02" class="btn"><tt>console</tt></div>
+	<div id="btn03" class="btn"><tt>console</tt></div>
+	
+	<div id="preloader" class="pie_progress" role="progressbar" data-goal="100" data-barcolor="#00ffff" data-barsize="2" aria-valuemin="0" aria-valuemax="100">
+        <div class="pie_progress__number">0%</div>
+                    <div class="pie_progress__label">loading</div>
+    </div>
+	
+	<script type="text/javascript">
+    jQuery(document).ready(function($){
+        $('.pie_progress').asPieProgress({
+            'namespace': 'pie_progress'
+        });
+        /*
+        $('#button_start').on('click', function(){
+            $('.pie_progress').asPieProgress('start');
+        });
+        $('#button_finish').on('click', function(){
+             $('.pie_progress').asPieProgress('finish');
+        });
+        $('#button_go').on('click', function(){
+             $('.pie_progress').asPieProgress('go','100%');
+        });
+        $('#button_go_percentage').on('click', function(){
+            $('.pie_progress').asPieProgress('go','50%');
+        });
+        $('#button_stop').on('click', function(){
+            $('.pie_progress').asPieProgress('stop');
+        });
+        $('#button_reset').on('click', function(){
+            $('.pie_progress').asPieProgress('reset');
+        });
+        */
+    });
+    </script>
+
+</body>
+
+</html>

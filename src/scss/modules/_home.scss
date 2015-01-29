@@ -5,6 +5,7 @@
     height: 100%;
     top: 0;
     left: 0;
+    opacity: .5;
 }
 #logo{
     @include sprite($logo);
@@ -25,10 +26,10 @@
  }
 
  #head_large{
-    @include sprite($head_large);
-    @include sprite-center($head_large);
+    @include sprite($head_genesis);
+    @include sprite-center($head_genesis);
     position: absolute;
-    top:128px;
+    top:192px;
     left:50%;
  }
 
