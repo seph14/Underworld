@@ -25,7 +25,7 @@ var rockConfig = {
 		//first 2s let the collision only dropping cracks move away from monolite
 		minMoveThreshold	: 0.5,
 		//minimum move threshold for physics detection, if smaller than this, set the crack be static
-		particleDroprate	: 10
+		particleDroprate	: 20
 };
 
 function RockAssemble () {
@@ -596,6 +596,9 @@ function PrepareRockParticle( cnt, scaleMin, scaleMax ){
 	rockParticle.particleCloud 		   = new THREE.PointCloud( geometry, material );
 	rockParticle.particleCloud.visible = false;
 	rockParticle.particleCloud.dynamic = true;
+	rockParticle.particleCloud.frustumCulled = false;
+
+	console.log( rockParticle.particleCloud );
 
 	scene.add( rockParticle.particleCloud );
 }

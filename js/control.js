@@ -82,15 +82,13 @@ function initScene() {
 	cameraTwo.lookAt( new THREE.Vector3(-688 + 160 * 0, -16, -237 + 3 * 160 ) );
 
 	cameraCube = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 100000 );
-	
 
 	fpsControl = new THREE.FirstPersonControls(cameraTwo);
 	fpsControl.movementSpeed = 110.1;
 	fpsControl.lookSpeed = 0.001;
 	fpsControl.lookVertical = true;
 	fpsControl.movementSpeed = 70;
-                fpsControl.noFly = false;
-
+    fpsControl.noFly = false;
 
 	cameraControl = new AR.CameraControl();
 	cameraControl.addCamera(cameraOne);
@@ -208,7 +206,7 @@ function initScene() {
 		LoadTerrainMatEnvMap();
 	}
 	
-	PrepareRockParticle( 15000, 0.05*10, 0.195*10 );
+	PrepareRockParticle( 15000, 0.05, 0.195 );
 
 	LoadTerrain();
 	//LoadDummy();
