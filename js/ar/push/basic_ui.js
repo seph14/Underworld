@@ -92,14 +92,14 @@ function onUpdate() {
 		 case 1:
 		 //rocktemp.push("");
 		 head_large.push("");
-		 btn02.push("welcome, humans");
-	 	btn03.push("enter the dome");
+		 //btn02.push("welcome, humans");
+	 	//btn03.push("enter the dome");
 		 quote_top.push("<p>\“ This is a set of beautiful components which include everything \„</p>");
 
 		 break;
 		 case 2:
-		 btn02.push("welcome, humans");
-	 	btn03.push("enter the dome");
+		 //btn02.push("welcome, humans");
+	 	//btn03.push("enter the dome");
 		 head_large.push("");
 		 quote_top.push("<p>\“ This is a set of beautiful components which include everything \„</p>");
 

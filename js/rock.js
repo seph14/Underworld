@@ -424,10 +424,10 @@ function LoadLightMat( texDiffuse, texNormal ){
 	uniformsmono[ "uMetallic"  ].value    	= 1.0;	
 	uniformsmono[ "uSpecular"  ].value    	= 1.0;	
 			
-	uniformsmono[ "uExposure"  ].value    	= 19.3375;
+	uniformsmono[ "uExposure"  ].value    	= 1.3375;
 	uniformsmono[ "uGamma" 	   ].value    	= 2.2;
 			
-	uniformsmono[ "uBaseColor"].value     	= new THREE.Color( 0xffffff );
+	uniformsmono[ "uBaseColor"].value     	= new THREE.Color( 0x333333 );
 	
 	var parametersmono = { fragmentShader: 	shadermono.fragmentShader, 
 						   vertexShader: 	shadermono.vertexShader, 
