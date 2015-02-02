@@ -11,6 +11,14 @@ function initAudioContext() {
   }
 }
 
+function updateProgress(evt) {
+   if (evt.lengthComputable) 
+   {  //evt.loaded the bytes browser receive
+      //evt.total the total bytes seted by the header
+     var percentComplete = (evt.loaded / evt.total)*100;  
+   } 
+}   
+
 function loadSound(url, updateProgress, clipBuffer) {
   var request = new XMLHttpRequest();
   request.open('GET', url, true);
@@ -24,6 +32,54 @@ function loadSound(url, updateProgress, clipBuffer) {
     }, onError);
   }
   request.send();
+}
+
+function BufferLoader(context, urlList, callback) {
+  this.context = context;
+  this.urlList = urlList;
+  this.onload = callback;
+  this.bufferList = new Array();
+  this.loadCount = 0;
+}
+
+BufferLoader.prototype.loadBuffer = function(url, index, updateProgress) {
+  // Load buffer asynchronously
+  var request = new XMLHttpRequest();
+  request.open("GET", url, true);
+  request.responseType = "arraybuffer";
+
+  var loader = this;
+
+  request.onprogress = updateProgress;
+  request.onload = function() {
+    // Asynchronously decode the audio file data in request.response
+    loader.context.decodeAudioData(
+      request.response,
+      function(buffer) {
+        if (!buffer) {
+          alert('error decoding file data: ' + url);
+          return;
+        }
+        loader.bufferList[index] = buffer;
+        if (++loader.loadCount == loader.urlList.length)
+          loader.onload(loader.bufferList);
+      },
+      function(error) {
+        console.error('decodeAudioData error', error);
+      }
+    );
+  }
+
+  request.onerror = function() {
+    alert('BufferLoader: XHR error');
+  }
+
+  request.send();
+}
+
+BufferLoader.prototype.load = function() {
+  for (var i = 0; i < this.urlList.length; ++i)
+  this.loadBuffer(this.urlList[i], i);
 }
 
 function BackgroundMusic() {
@@ -44,14 +100,6 @@ BackgroundMusic.prototype.load      = function(){
   var loader = new BufferLoader(context, this.urls, onLoad);
   loader.load();
 }
-
-function updateProgress(evt) {
-   if (evt.lengthComputable) 
-   {  //evt.loaded the bytes browser receive
-      //evt.total the total bytes seted by the header
-     var percentComplete = (evt.loaded / evt.total)*100;  
-   } 
-}   
 
 BackgroundMusic.prototype.playPause = function() {
   if (this.playing) {
@@ -82,8 +130,8 @@ BackgroundMusic.prototype.setIntensity = function(normVal) {
   var leftNode = Math.floor(value);
   // Normalize the value between 0 and 1.
   var x     = value - leftNode;
-  var gain1 = Math.cos(x * 0.5*Math.PI);
-  var gain2 = Math.cos((1.0 - x) * 0.5*Math.PI);
+  var gain1 = Math.cos(x * 0.5 * Math.PI);
+  var gain2 = Math.cos((1.0 - x) * 0.5 * Math.PI);
   //console.log(gain1, gain2);
   // Set the two gains accordingly.
   this.gains[leftNode].gain.value = gain1;
