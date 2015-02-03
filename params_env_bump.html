@@ -30,7 +30,7 @@
 		#stats #fps #fpsText { color: #444 !important }
 		#stats #fps #fpsGraph { display: none }
 	</style>
-	<script type="text/javascript" src="framework/three.js"></script>
+	<script type="text/javascript" src="framework/three.min.js"></script>
 	<script type="text/javascript" src="framework/stats.js"></script>
 	
 	<script type="text/javascript" src="framework/ThreeJS_Lib/shaders/CopyShader.js"></script>
@@ -97,7 +97,7 @@
 
 			// CAMERA
 			camera = new THREE.PerspectiveCamera( 45, SCREEN_WIDTH / SCREEN_HEIGHT, NEAR, FAR );
-			camera.position.set( 80, -130, 80 );
+			camera.position.set(580, 130, 80 );
 			camera.lookAt( scene.position );
 
 			// RENDERER
@@ -152,6 +152,7 @@
 
 			////////////////////////////////////////////////////////////////
 			//environemnt map
+			
 			var path = "textures/envmap/";
 			var format = '.png';
 			var urls = [
@@ -159,7 +160,23 @@
 					path + 'py' + format, path + 'ny' + format,
 					path + 'pz' + format, path + 'nz' + format
 				];
-			var textureCube = THREE.ImageUtils.loadTextureCube( urls, new THREE.CubeRefractionMapping() );
+			var textureCube = THREE.ImageUtils.loadTextureCube( urls );
+
+			/*
+			var shader = THREE.ShaderUtils.lib["cube"];
+			var uniforms = THREE.UniformsUtils.clone( shader.uniforms );
+			uniforms['tCube'].texture= textureCube;   // textureCube has been init before
+			var material = new THREE.MeshShaderMaterial({
+			    fragmentShader    : shader.fragmentShader,
+			    vertexShader  : shader.vertexShader,
+			    uniforms  : uniforms
+			});
+			// build the skybox Mesh 
+			var skyboxMesh    = new THREE.Mesh( new THREE.CubeGeometry( 100000, 100000, 100000, 1, 1, 1, null, true ), material );
+			// add it to the scene
+			scene.addObject( skyboxMesh );
+			*/
+
 			////////////////////////////////////////////////////////////////
 			//shader stuff			
 			var shader 	 = THREE.ShaderPBR[ "PBR_Env_Bump" ];
@@ -216,14 +233,17 @@
 						var offset 	= child.geometry.boundingBox.center();
 						child.geometry.applyMatrix( new THREE.Matrix4().makeTranslation( - offset.x, - offset.y, - offset.z ) );
 						child.position.set( offset.x, offset.y, offset.z );
+						child.matrixAutoUpdate = false;
+						child.updateMatrix();
 //						scene.add(child);
 //						rockMesh.push(child);
 
 						for(var i=0; i<64;i++) {
 							var test = child.clone();
-							test.position.set( offset.x+(Math.random()-.5)*500, 20+(Math.random()-.5)*15, offset.z+(Math.random()-.5)*500 );
+							test.position.set( offset.x+(Math.random()-.5)*500, 50+(Math.random()-.5)*15, offset.z+(Math.random()-.5)*500 );
 							test.rotation.set( offset.x+(Math.random()-.5)*500, 20+(Math.random()-.5)*15, offset.z+(Math.random()-.5)*500 );
 							scene.add(test);
+							test.updateMatrix();
 						}
 
 					}
@@ -246,8 +266,9 @@
 						var offset 	= child.geometry.boundingBox.center();
 						child.geometry.applyMatrix( new THREE.Matrix4().makeTranslation( - offset.x, - offset.y, - offset.z ) );
 						child.position.set( 0, 0, 0);
-						child.scale.set(1,.1,1);
-
+						child.scale.set(1,.3,1);
+						child.matrixAutoUpdate = false;
+						child.updateMatrix();
 						child.receiveShadow = true; 
 						child.castShadow 	= true;
 						scene.add(child);
