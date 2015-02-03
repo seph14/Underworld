@@ -176,12 +176,12 @@
 			uniforms[ "uNormalMap" ].value.repeat.set( 2, 2 );
 
 			uniforms[ "uCubeMapTex" ].value 	= textureCube;
-			uniforms[ "uRoughness" ].value    	= 0.8;	
-			uniforms[ "uRoughness4" ].value    	= 0.8 * 0.8 * 0.8 * 0.8;	
-			uniforms[ "uMetallic"  ].value    	= 0.3;	
-			uniforms[ "uSpecular"  ].value    	= 0.3;	
-			uniforms[ "uExposure"  ].value    	= 6.3375;
-			uniforms[ "uGamma" 	   ].value    	= 2.2;			
+			uniforms[ "uRoughness" ].value    	= 0.4;	
+			uniforms[ "uRoughness4" ].value    	= 0.4 * 0.4 * 0.4 * 0.4;	
+			uniforms[ "uMetallic"  ].value    	= 0.61;	
+			uniforms[ "uSpecular"  ].value    	= 0.16;	
+			uniforms[ "uExposure"  ].value    	= 5.3375;
+			uniforms[ "uGamma" 	   ].value    	= 2.5;			
 			uniforms[ "uBaseColor"].value     	= new THREE.Color( 0x251a22 );
 			
 			var parameters = { fragmentShader: 	shader.fragmentShader, 
@@ -216,12 +216,63 @@
 						var offset 	= child.geometry.boundingBox.center();
 						child.geometry.applyMatrix( new THREE.Matrix4().makeTranslation( - offset.x, - offset.y, - offset.z ) );
 						child.position.set( offset.x, offset.y, offset.z );
-						scene.add(child);
-						rockMesh.push(child);
+//						scene.add(child);
+//						rockMesh.push(child);
+
+						for(var i=0; i<64;i++) {
+							var test = child.clone();
+							test.position.set( offset.x+(Math.random()-.5)*500, 20+(Math.random()-.5)*15, offset.z+(Math.random()-.5)*500 );
+							test.rotation.set( offset.x+(Math.random()-.5)*500, 20+(Math.random()-.5)*15, offset.z+(Math.random()-.5)*500 );
+							scene.add(test);
+						}
+
 					}
 				});
 			}, onProgress, onError );
+
 			
+			var url = "models/terrainA.obj";
+			loader.load( url, function ( object ) {
+				object.traverse( function ( child ) {
+					if ( child instanceof THREE.Mesh ) {
+						
+						child.geometry.computeFaceNormals ();
+						child.geometry.computeVertexNormals ();
+						child.material = rockMat;
+						child.geometry.computeBoundingBox ();
+
+						console.log("pämm "+child.geometry.boundingBox.center().x);
+						
+						var offset 	= child.geometry.boundingBox.center();
+						child.geometry.applyMatrix( new THREE.Matrix4().makeTranslation( - offset.x, - offset.y, - offset.z ) );
+						child.position.set( 0, 0, 0);
+						child.scale.set(1,.1,1);
+
+						child.receiveShadow = true; 
+						child.castShadow 	= true;
+						scene.add(child);
+					}
+				} );
+			}, onProgress, onError );
+			
+
+			//
+/*
+			loader.load( "models/Piece9.obj", function ( object ) {
+				object.traverse( function ( child ) {
+					if ( child instanceof THREE.Mesh ) {
+						child.material = rockMat;				
+						child.geometry.applyMatrix(matrix);
+						child.geometry.computeBoundingBox ();
+						var offset 	= child.geometry.boundingBox.center();
+						child.geometry.applyMatrix( new THREE.Matrix4().makeTranslation( - offset.x, - offset.y, - offset.z ) );
+						child.position.set( offset.x, offset.y, offset.z );
+						scene.add(child);
+						//rockMesh.push(child);
+					}
+				});
+			}, onProgress, onError );
+*/			
 			//EVENTS
 			document.addEventListener( 'mousemove',  onDocumentMouseMove,  false );
 			container.addEventListener( 'click', 	 onDocumentMouseDown,  false );
