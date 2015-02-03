@@ -97,8 +97,8 @@
 
 			// CAMERA
 			camera = new THREE.PerspectiveCamera( 45, SCREEN_WIDTH / SCREEN_HEIGHT, NEAR, FAR );
-			camera.position.set(580, 130, 80 );
-			camera.lookAt( scene.position );
+			camera.position.set(580, 300, 80 );
+			camera.lookAt( new THREE.Vector3( 0, 500, 0 ));
 
 			// RENDERER
 			renderer = new THREE.WebGLRenderer( { antialias: false, precision: "mediump" } );
@@ -219,8 +219,9 @@
 			var onProgress 	= function ( xhr ) { };
 			var onError 	= function ( xhr ) { trace("file not found"); };
 
+			//rockMat 	= new THREE.MeshNormalMaterial();
 			// model
-			var loader = new THREE.OBJLoader( manager );
+			var loader 	= new THREE.OBJLoader( manager );
 
 			var cidx = 0;
 			var root = "models/RockHollow0_.obj";
@@ -240,7 +241,7 @@
 
 						for(var i=0; i<64;i++) {
 							var test = child.clone();
-							test.position.set( offset.x+(Math.random()-.5)*500, 50+(Math.random()-.5)*15, offset.z+(Math.random()-.5)*500 );
+							test.position.set( offset.x+(Math.random()-.5)*500, 150+(Math.random()-.5)*15, offset.z+(Math.random()-.5)*500 );
 							test.rotation.set( offset.x+(Math.random()-.5)*500, 20+(Math.random()-.5)*15, offset.z+(Math.random()-.5)*500 );
 							scene.add(test);
 							test.updateMatrix();
@@ -264,6 +265,7 @@
 						console.log("pämm "+child.geometry.boundingBox.center().x);
 						
 						var offset 	= child.geometry.boundingBox.center();
+						offset.y = child.geometry.boundingBox.min.y;
 						child.geometry.applyMatrix( new THREE.Matrix4().makeTranslation( - offset.x, - offset.y, - offset.z ) );
 						child.position.set( 0, 0, 0);
 						child.scale.set(1,.3,1);
@@ -271,7 +273,26 @@
 						child.updateMatrix();
 						child.receiveShadow = true; 
 						child.castShadow 	= true;
-						scene.add(child);
+//						scene.add(child);
+
+						for(var i=0; i<512;i++) {
+							var test = child.clone();
+							test.position.set( (Math.random()-.5)*12700, 0, (Math.random()-.5)*12500 );
+							var sx = Math.random()*2+1;
+							var sy = (Math.random()-.5)*4;
+
+							if(sy<0) {
+								test.position.y = 2000;
+								test.rotation.set(0,0,Math.PI);
+								test.scale.set(sx,-sy,sx);
+							} else {
+								test.position.y = -500;
+								test.scale.set(sx,sy,sx);
+							}
+							scene.add(test);
+							test.matrixAutoUpdate=false;
+							test.updateMatrix();
+						}
 					}
 				} );
 			}, onProgress, onError );
