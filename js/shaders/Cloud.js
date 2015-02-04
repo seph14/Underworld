@@ -125,7 +125,7 @@ THREE.CloudShader = {
 			"float cloud    = saturate(displace( cuv ) * noise);",
 			"vec3  cloudc  	= cloud * cloud * cloudCol;",
 			"vec3  color 	= texture2D(tColor, vUv).rgb;",
-			"float depth 	= cloudScale * (1.0 - cDepth * cDepth);",
+			"float depth 	= cloudScale * (1.0 - 0.9 * cDepth * cDepth);",
 			//"gl_FragColor 	= vec4( mix(cloudc, color, cDepth * cDepth), 1.0 );",
 			"gl_FragColor 	= vec4( saturate(color + depth * cloudc), 1.0 );",
 		"}"

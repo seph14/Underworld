@@ -123,7 +123,7 @@ function initScene() {
 	// RENDERER
 	//logarithmicDepthBuffer: true 
 	//for depth map which will be for rendering clouds.
-	renderer = new THREE.WebGLRenderer( { antialias: false, precision: "mediump" } );
+	renderer = new THREE.WebGLRenderer( { antialias: false, precision: "mediump", logarithmicDepthBuffer: true } );
 	renderer.setClearColor( scene.fog.color, 1 );
 	renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
 
