@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Shading Test</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<style>
+		body {
+			color: #fff;
+			font-family: Avenir;
+			font-size: 13px;
+			text-align: center;
+			font-weight: bold;
+
+			-webkit-touch-callout: 	none;
+    		-webkit-user-select: 	none;
+    		-khtml-user-select: 	none;
+    		-moz-user-select: 		none;
+    		-ms-user-select: 		none;
+    		user-select: 			none;
+
+			background-color: #bababa;
+			margin: 0px;
+			overflow: hidden;
+		}
+
+		a { color: skyblue; }
+
+		#stats #fps { background: transparent !important }
+		#stats #fps #fpsText { color: #444 !important }
+		#stats #fps #fpsGraph { display: none }
+	</style>
+	<script type="text/javascript" src="framework/three.min.js"></script>
+	<script type="text/javascript" src="framework/stats.js"></script>
+	
+	<script type="text/javascript" src="framework/ThreeJS_Lib/shaders/CopyShader.js"></script>
+	<script type="text/javascript" src="framework/ThreeJS_Lib/shaders/FXAAShader.js"></script>
+	
+	<script type="text/javascript" src="framework/ThreeJS_Lib/postprocessing/EffectComposer.js"></script>
+	<script type="text/javascript" src="framework/ThreeJS_Lib/postprocessing/RenderPass.js"></script>
+	<script type="text/javascript" src="framework/ThreeJS_Lib/postprocessing/BloomPass.js"></script>
+	<script type="text/javascript" src="framework/ThreeJS_Lib/postprocessing/ShaderPass.js"></script>
+	<script type="text/javascript" src="framework/ThreeJS_Lib/postprocessing/MaskPass.js"></script>
+	<script type="text/javascript" src="framework/ThreeJS_Lib/postprocessing/SavePass.js"></script>
+
+	<script type="text/javascript" src="framework/ThreeJS_Lib/controls/TrackballControls.js"></script>
+	<script type="text/javascript" src="framework/ThreeJS_Lib/Detector.js"></script>
+	<script type="text/javascript" src='framework/ThreeJS_Lib/libs/dat.gui.min.js'></script>
+
+	<script type="text/javascript" src="framework/ThreeJS_Lib/loaders/OBJLoader.js"></script>
+	<script type="text/javascript" src="js/shaders/PBR.js"></script>
+	<script type="text/javascript" src="js/shaders/Cloud.js"></script>
+	<script type="text/javascript" src="js/CloudPass.js"></script>
+	<script>
+		'use strict';
+
+		var MARGIN = 0;
+		var WIDTH  = window.innerWidth || 2;
+		var HEIGHT = window.innerHeight || ( 2 + 2 * MARGIN );
+		var SCREEN_WIDTH  = WIDTH;
+		var SCREEN_HEIGHT = HEIGHT - 2 * MARGIN;
+		var FAR  = 10000;
+		var NEAR = 1;
+		var clock = new THREE.Clock();
+		
+		var container, stats;
+		var camera, scene, renderer;
+		var camControl;
+		
+		var rockMat;
+		var composer, effectCloud;
+
+		var paramConfig = {
+			uRoughness : 1.0,
+			uMetallic  : 0.2,
+			uSpecular  : 0.1,
+			uDetails   : 1.0,
+			uExposure  : 6.3375,
+			uGamma	   : 2.2,
+		};
+
+		function initScene() {
+
+			if ( ! Detector.webgl ){
+				Detector.addGetWebGLMessage();
+				return;
+			}
+
+			container = document.getElementById( 'viewport' );
+			
+			stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			stats.domElement.style.zIndex = 100;
+			container.appendChild( stats.domElement );
+	
+			// SCENE
+			scene = new THREE.Scene();
+			scene.fog = new THREE.Fog( 0xcdcdcd, 1000, FAR );
+
+			// CAMERA
+			camera = new THREE.PerspectiveCamera( 45, SCREEN_WIDTH / SCREEN_HEIGHT, NEAR, FAR );
+			camera.position.set(580, 300, 80 );
+			camera.lookAt( new THREE.Vector3( 0, 500, 0 ));
+
+			// RENDERER
+			renderer = new THREE.WebGLRenderer( { antialias: false, precision: "mediump" } );
+			renderer.setClearColor( 0x000000, 1 );
+			renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+
+			renderer.domElement.style.position = "absolute";
+			renderer.domElement.style.top = MARGIN + "px";
+			renderer.domElement.style.left = "0px";
+			container.appendChild( renderer.domElement );
+
+			//
+			renderer.shadowMapEnabled = true;
+			renderer.shadowMapType = THREE.PCFSoftShadowMap;
+
+			//
+			renderer.gammaInput = true;
+			renderer.gammaOutput = true;
+
+			camControl = new THREE.TrackballControls( camera, renderer.domElement );
+			camControl.target.set( 0, 0, 0 );
+
+			camControl.rotateSpeed = 1.0;
+			camControl.zoomSpeed = 1.2;
+			camControl.panSpeed = 0.8;
+
+			camControl.noZoom = false;
+			camControl.noPan = false;
+
+			camControl.staticMoving = true;
+			camControl.dynamicDampingFactor = 0.15;
+
+			camControl.keys = [ 65, 83, 68 ];
+
+			var renderTargetParameters = { minFilter: 		THREE.LinearFilter, 
+										   magFilter: 		THREE.LinearFilter, 
+										   format: 			THREE.RGBFormat, 
+										   stencilBuffer: 	false };
+			var renderTarget = new THREE.WebGLRenderTarget( SCREEN_WIDTH, SCREEN_HEIGHT, renderTargetParameters );
+			var renderModel  = new THREE.RenderPass( scene, camera );
+			//renderer.autoClear = false;
+
+			effectCloud = new THREE.CloudPass( scene, camera, {
+				width: 		SCREEN_WIDTH,
+				height: 	SCREEN_HEIGHT
+			});
+
+			effectCloud.renderToScreen = true;
+
+			composer = new THREE.EffectComposer( renderer, renderTarget );
+			composer.addPass( renderModel );
+			composer.addPass( effectCloud );
+
+			////////////////////////////////////////////////////////////////
+			//environemnt map
+			
+			var path = "textures/envmap/";
+			var format = '.png';
+			var urls = [
+					path + 'px' + format, path + 'nx' + format,
+					path + 'py' + format, path + 'ny' + format,
+					path + 'pz' + format, path + 'nz' + format
+				];
+			var textureCube = THREE.ImageUtils.loadTextureCube( urls );
+
+			////////////////////////////////////////////////////////////////
+			//shader stuff			
+			var shader 	 = THREE.ShaderPBR[ "PBR_Env_Bump" ];
+			var uniforms = THREE.UniformsUtils.clone( shader.uniforms );
+
+			uniforms[ "uBaseColorMap" ].value 		= THREE.ImageUtils.loadTexture( "textures/Rock_A_01_Diffuse.png" );
+			uniforms[ "uBaseColorMap" ].value.wrapS = THREE.RepeatWrapping;
+			uniforms[ "uBaseColorMap" ].value.wrapT = THREE.RepeatWrapping;
+			uniforms[ "uBaseColorMap" ].value.repeat.set( 2, 2 );
+		
+			uniforms[ "uNormalMap" ].value    		= THREE.ImageUtils.loadTexture( "textures/Rock_A_01_Normal.png" );
+			uniforms[ "uNormalMap" ].value.wrapS 	= THREE.RepeatWrapping;
+			uniforms[ "uNormalMap" ].value.wrapT 	= THREE.RepeatWrapping;
+			uniforms[ "uNormalMap" ].value.repeat.set( 2, 2 );
+
+			uniforms[ "uCubeMapTex" ].value 	= textureCube;
+			uniforms[ "uRoughness" ].value    	= 0.4;	
+			uniforms[ "uRoughness4" ].value    	= 0.4 * 0.4 * 0.4 * 0.4;	
+			uniforms[ "uMetallic"  ].value    	= 0.61;	
+			uniforms[ "uSpecular"  ].value    	= 0.16;	
+			uniforms[ "uExposure"  ].value    	= 5.3375;
+			uniforms[ "uGamma" 	   ].value    	= 2.2;			
+			uniforms[ "uBaseColor"].value     	= new THREE.Color( 0x251a22 );
+			
+			var parameters = { fragmentShader: 	shader.fragmentShader, 
+							   vertexShader: 	shader.vertexShader, 
+							   uniforms: 		uniforms, 
+							   lights: 			false, 
+							   fog: 			true,
+							   morphTargets:    false,
+							   morphNormals:    false,
+							   shading: 		THREE.SmoothShading };
+			rockMat = new THREE.ShaderMaterial( parameters );
+			var manager = new THREE.LoadingManager();
+			manager.onProgress = function ( item, loaded, total ) { };
+	
+			var matrix = new THREE.Matrix4;
+			matrix.multiplyScalar(10.0);
+
+			var onProgress 	= function ( xhr ) { };
+			var onError 	= function ( xhr ) { trace("file not found"); };
+
+			// model
+			var loader 	= new THREE.OBJLoader( manager );
+			
+			var url = "models/terrainA.obj";
+			loader.load( url, function ( object ) {
+				object.traverse( function ( child ) {
+					if ( child instanceof THREE.Mesh ) {
+						
+						child.geometry.computeFaceNormals ();
+						child.geometry.computeVertexNormals ();
+						child.material = rockMat;
+						child.geometry.computeBoundingBox ();
+
+						console.log("pämm "+child.geometry.boundingBox.center().x);
+						
+						var offset 	= child.geometry.boundingBox.center();
+						offset.y = child.geometry.boundingBox.min.y;
+						child.geometry.applyMatrix( new THREE.Matrix4().makeTranslation( - offset.x, - offset.y, - offset.z ) );
+						child.position.set( 0, 0, 0);
+						child.scale.set(1,.3,1);
+						child.matrixAutoUpdate = false;
+						child.updateMatrix();
+						child.receiveShadow = true; 
+						child.castShadow 	= true;
+//						scene.add(child);
+
+						for(var i=0; i<512;i++) {
+							var test = child.clone();
+							test.position.set( (Math.random()-.5)*12700, 0, (Math.random()-.5)*12500 );
+							var sx = Math.random()*2+1;
+							var sy = (Math.random()-.5)*4;
+
+							if(sy<0) {
+								test.position.y = 2000;
+								test.rotation.set(0,0,Math.PI);
+								test.scale.set(sx,-sy,sx);
+							} else {
+								test.position.y = -500;
+								test.scale.set(sx,sy,sx);
+							}
+							scene.add(test);
+							test.matrixAutoUpdate=false;
+							test.updateMatrix();
+						}
+					}
+				} );
+			}, onProgress, onError );
+			
+			//EVENTS
+			document.addEventListener( 'mousemove',  onDocumentMouseMove,  false );
+			container.addEventListener( 'click', 	 onDocumentMouseDown,  false );
+			window.addEventListener  ( 'resize',     onWindowResize,       false );
+			window.addEventListener  ( 'keydown',    onKeyDown,            false ); 
+			var gui = new dat.GUI();
+			gui.add( paramConfig, 'uRoughness', 0.0, 1.0 ).onChange( function() {
+				rockMat.uniforms.uRoughness.value  = 0.0001 + paramConfig.uRoughness;
+				rockMat.uniforms.uRoughness4.value = 0.0001 + 
+					paramConfig.uRoughness * paramConfig.uRoughness *
+					paramConfig.uRoughness * paramConfig.uRoughness;
+			});
+	
+			gui.add( paramConfig, 'uMetallic', 0.0, 1.0 ).onChange( function() {
+				rockMat.uniforms.uMetallic.value = paramConfig.uMetallic;
+			});
+
+			gui.add( paramConfig, 'uSpecular', 0.0, 1.0 ).onChange( function() {
+				rockMat.uniforms.uSpecular.value = paramConfig.uSpecular;
+			});
+
+			gui.add( paramConfig, 'uExposure', 0.0, 10.0 ).onChange( function() {
+				rockMat.uniforms.uExposure.value = paramConfig.uExposure;
+			});
+
+			gui.add( paramConfig, 'uGamma', 1.0, 3.0 ).onChange( function() {
+				rockMat.uniforms.uGamma.value = paramConfig.uGamma;
+			});
+			gui.close();
+
+			clock.start();
+			animate();
+		}
+
+		function onWindowResize() {
+			SCREEN_WIDTH  = window.innerWidth;
+			SCREEN_HEIGHT = window.innerHeight - 2 * MARGIN;
+
+			camera.aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
+			camera.updateProjectionMatrix();
+
+			renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+			composer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+
+			//camControl.handleResize();
+		}
+
+		function onKeyDown( event ){
+
+		}
+
+		function onDocumentMouseDown( event ){
+			//event.preventDefault();
+		}
+
+		function onDocumentMouseMove( event ) {	
+
+		}
+
+		function animate() {
+			requestAnimationFrame( animate );
+			render();
+			stats.update();
+		}
+
+		function render() {
+			camControl.update();
+
+			effectCloud.setTime		( clock.getElapsedTime () );
+			//effectCloud.setCameraDirection( camera.rotation.x, camera.rotation.z );
+
+			//renderer.render( scene, camera );
+			//renderer.clearTarget( null, 1, 1, 1 );
+			composer.render( 0.1 );
+		}
+
+		window.onload = initScene;
+
+	</script>
+</head>
+
+<body>	
+	<div id="viewport"></div>
+</body>
+
+</html>

@@ -14,14 +14,13 @@ var mouse = {};
 
 var container, stats;
 var camera, cameraOne, cameraTwo, scene, renderer;
-var cameraCube, sceneCube, skyMesh;
 var ambientLight, sunLight, directionalLight;
 var camControl;
 var fpsControl;
 
 var rocks = [];
 
-var composer, effectFXAA;
+var composer, effectFXAA, effectCloud;
 
 var cameraControl;
 
@@ -59,13 +58,10 @@ function initScene() {
 
 	// SCENE
 	scene 			= new THREE.Scene();
-	sceneCube 		= new THREE.Scene();
 	if( touchable ){
 		scene.fog 		= new THREE.Fog( 0x8a8b96, 10, FAR/4 );
-		sceneCube.fog 	= new THREE.Fog( 0xbcafa7, 10, FAR/4 );
 	}else{
 		scene.fog 		= new THREE.FogExp2( 0x8a8b96, 0.0009 );
-		sceneCube.fog 	= new THREE.FogExp2( 0x9696a2, 0.0007 );
 	}
 	
 	// CAMERA
@@ -80,8 +76,6 @@ function initScene() {
 	cameraTwo = new THREE.PerspectiveCamera( 60, SCREEN_WIDTH / SCREEN_HEIGHT, NEAR, FAR );
 	cameraTwo.position.set( -144.52, -394.97, -289.79 );
 	cameraTwo.lookAt( new THREE.Vector3(-688 + 160 * 0, -16, -237 + 3 * 160 ) );
-
-	cameraCube = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 100000 );
 
 	fpsControl = new THREE.FirstPersonControls(cameraTwo);
 	fpsControl.movementSpeed = 110.1;
@@ -127,6 +121,8 @@ function initScene() {
 	}
 
 	// RENDERER
+	//logarithmicDepthBuffer: true 
+	//for depth map which will be for rendering clouds.
 	renderer = new THREE.WebGLRenderer( { antialias: false, precision: "mediump" } );
 	renderer.setClearColor( scene.fog.color, 1 );
 	renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
@@ -144,53 +140,30 @@ function initScene() {
 	renderer.gammaInput = true;
 	renderer.gammaOutput = true;
 
-
-	//skybox
-	/*var path = "textures/skydark/";
-	var format = '.jpg';
-	var urls = [
-				path + 'px' + format, path + 'nx' + format,
-				path + 'py' + format, path + 'ny' + format,
-				path + 'pz' + format, path + 'nz' + format
-			];
-	var textureCube = THREE.ImageUtils.loadTextureCube( urls, new THREE.CubeRefractionMapping() );
-	
-	var shader = THREE.ShaderLib[ "cube" ];
-	shader.uniforms[ "tCube" ].value = textureCube;
-
-	var material = new THREE.ShaderMaterial( {
-		fragmentShader: shader.fragmentShader,
-		vertexShader: 	shader.vertexShader,
-		uniforms: 		shader.uniforms,
-		depthWrite: 	false,
-		side: 			THREE.BackSide
-	} );
-
-	skyMesh = new THREE.Mesh( new THREE.BoxGeometry( FAR, FAR, FAR ), material );
-	sceneCube.add( skyMesh );*/
-
 	// COMPOSER
-
+	onWindowResize();
+	
 	var renderTargetParameters = { minFilter: 		THREE.LinearFilter, 
 								   magFilter: 		THREE.LinearFilter, 
 								   format: 			THREE.RGBFormat, 
 								   stencilBuffer: 	false };
 	var renderTarget = new THREE.WebGLRenderTarget( SCREEN_WIDTH, SCREEN_HEIGHT, renderTargetParameters );
-	var renderSky    = new THREE.RenderPass( sceneCube, cameraCube );
 	var renderModel  = new THREE.RenderPass( scene, camera );
 
 	renderer.autoClear = true;
 	renderModel.clear  = true;
+
+	effectCloud = new THREE.CloudPass( scene, camera, { width: SCREEN_WIDTH, height: SCREEN_HEIGHT });
+	//effectCloud.renderToScreen = true;
 
 	effectFXAA = new THREE.ShaderPass( THREE.FXAAShader );
 	effectFXAA.uniforms[ 'resolution' ].value.set( 1 / SCREEN_WIDTH, 1 / SCREEN_HEIGHT );
 	effectFXAA.renderToScreen = true;
 
 	composer = new THREE.EffectComposer( renderer, renderTarget );
-	//composer.addPass( renderSky   );
-	composer.addPass( renderModel );
+	composer.addPass( renderModel );			
+	composer.addPass( effectCloud );
 	composer.addPass( effectFXAA );
-	onWindowResize();
 	
 	if( debug ){
 		CreateRockGUI();
@@ -248,12 +221,14 @@ function onWindowResize() {
 	camera.aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
 	camera.updateProjectionMatrix();
 
-	cameraCube.aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
-	cameraCube.updateProjectionMatrix();
+	if( renderer ){
+		renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+	}
 
-	renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
-	composer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
-
+	if( composer ){
+		composer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+	}
+	
 	//update with
 	//window.devicePixelRatio
 	//for retina screens
@@ -261,9 +236,11 @@ function onWindowResize() {
 	//this 0.5 should be 1.0 / scale 
 	//so for iphone6plus this should be 0.33?
 	//need to test though
-	effectFXAA.uniforms[ 'resolution' ]
-		.value.set( 1 / (SCREEN_WIDTH  * window.devicePixelRatio), 
-					1 / (SCREEN_HEIGHT * window.devicePixelRatio) );
+	if( effectFXAA ){
+		effectFXAA.uniforms[ 'resolution' ]
+			.value.set( 1 / (SCREEN_WIDTH  * window.devicePixelRatio), 
+						1 / (SCREEN_HEIGHT * window.devicePixelRatio) );
+	}
 }
 
 function onKeyDown( event ){
@@ -321,8 +298,8 @@ function render() {
 		rocks[i].update();
 	}
 
-	var t = 5 * clock.getElapsedTime ();
-	rockParticle.update( rocks[3].scaler, t );
+	var t = clock.getElapsedTime ();
+	rockParticle.update( rocks[3].scaler, t * 5 );
 
 	// camera.position.set( -144.52, -394.97, -289.79 );	
 	var targetX = -223+mouse.x*20;
@@ -361,6 +338,7 @@ function render() {
 						 cameraControl.currentCamera.position.z );
 	//copy camera rotation + position so we can keep using composer setting
 	//where fxaa is preserved.
+	effectCloud.setTime( t );
 	composer.render( 0.1 );
 
 	//renderer.render( scene, cameraControl.currentCamera );

@@ -18,9 +18,9 @@ THREE.ShaderPass = function ( shader, textureID ) {
 
 	this.renderToScreen = false;
 
-	this.enabled = true;
+	this.enabled   = true;
 	this.needsSwap = true;
-	this.clear = false;
+	this.clear     = false;
 
 
 	this.camera = new THREE.OrthographicCamera( -1, 1, 1, -1, 0, 1 );
