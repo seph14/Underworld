@@ -233,9 +233,9 @@
 						child.updateMatrix();
 						child.receiveShadow = true; 
 						child.castShadow 	= true;
-//						scene.add(child);
+						scene.add(child);
 
-						for(var i=0; i<512;i++) {
+						/*for(var i=0; i<10;i++) {
 							var test = child.clone();
 							test.position.set( (Math.random()-.5)*12700, 0, (Math.random()-.5)*12500 );
 							var sx = Math.random()*2+1;
@@ -252,7 +252,7 @@
 							scene.add(test);
 							test.matrixAutoUpdate=false;
 							test.updateMatrix();
-						}
+						}*/
 					}
 				} );
 			}, onProgress, onError );

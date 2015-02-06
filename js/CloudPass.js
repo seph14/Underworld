@@ -12,49 +12,50 @@ THREE.CloudPass = function ( scene, camera, params ) {
 	this.scene  = scene;
 	this.camera = camera;
 
-	var uTime 	= ( params.time 	!== undefined ) ? params.time 	: 0.0;
-	var cam   	= ( params.cam  	!== undefined ) ? params.cam  	: (new THREE.Vector2);
+	var uTime 	= ( params.time 	!== undefined ) ? params.time 		: 0.0;
+	var cam   	= ( params.cam  	!== undefined ) ? params.cam  		: (new THREE.Vector3);
+	//this.trace 	= ( params.raytrace !== undefined ) ? params.raytrace 	: true;
 	var tCloud;
 
 	if( params.tCloud !== undefined ){
 		tCloud = params.tCloud;
 	}else{
-		tCloud 		 = THREE.ImageUtils.loadTexture( "textures/cloud.png" );
+		tCloud 		 = THREE.ImageUtils.loadTexture( "textures/noise.png" );
 		tCloud.wrapS = THREE.RepeatWrapping;
 		tCloud.wrapT = THREE.RepeatWrapping;
-		tCloud.repeat.set( 3, 3 );
+		//tCloud.repeat.set( 3, 3 );
 	}
 
 	// render targets
-	var width  = params.width || window.innerWidth || 1;
+	var width  = params.width  || window.innerWidth  || 1;
 	var height = params.height || window.innerHeight || 1;
 
-	this.renderTargetColor = new THREE.WebGLRenderTarget( width, height, {
+	this.renderTargetDepth = new THREE.WebGLRenderTarget( width, height, {
 		minFilter: THREE.LinearFilter,
 		magFilter: THREE.LinearFilter,
 		format: THREE.RGBFormat //we only need one channel here, but seems LuminanceFormat not supported by default depth material
 								//and there is no Rformat for us to save some memory, uh 
-	} );
-
-	this.renderTargetDepth = this.renderTargetColor.clone();
-
-	// depth material
-	this.materialDepth = new THREE.MeshDepthMaterial();
+	} );//this.renderTargetColor.clone();
+	this.materialDepth 	   = new THREE.MeshDepthMaterial();
 
 	// cloud material
-	if ( THREE.CloudShader === undefined ) {
+	/*if ( !this.trace && THREE.CloudShader === undefined ) {
 		console.error( "THREE.CloudPass relies on THREE.CloudShader" );
+	}*/
+
+	if ( THREE.CloudRayMarchShader === undefined ) {
+		console.error( "THREE.CloudPass relies on THREE.CloudRayMarchShader" );
 	}
 	
-	var cloudShader   = THREE.CloudShader;
+	var cloudShader   = THREE.CloudRayMarchShader; //this.trace ? THREE.CloudRaytraceShader : THREE.CloudShader;
 	var cloudUniforms = THREE.UniformsUtils.clone( cloudShader.uniforms );
 
+	cloudUniforms[ "resolution" ].value = new THREE.Vector2( width, height );
 	cloudUniforms[ "tDepth" ].value 	= this.renderTargetDepth;
 	cloudUniforms[ "tCloud" ].value 	= tCloud;
 
 	cloudUniforms[ "uTime" ].value 		= uTime;
-	cloudUniforms[ "camDirec" ].value 	= cam;
-
+	
 	this.materialCloud = new THREE.ShaderMaterial({
 		uniforms: 		cloudUniforms,
 		vertexShader: 	cloudShader.vertexShader,
@@ -82,10 +83,26 @@ THREE.CloudPass.prototype = {
 
 		// Render depth into texture
 		this.scene.overrideMaterial = this.materialDepth;
+		var clearCol 				= this.scene.fog.color;
+		renderer.setClearColor( 0x000000, 1 ); 
+		//we need to make sure the buffer been cleared to black so the depth map is consistent
 		renderer.render( this.scene, this.camera, this.renderTargetDepth, true );
+		renderer.setClearColor( clearCol, 1 );
 
 		// Render cloud effect
-		this.uniforms[ "tColor" ].value = readBuffer;
+     	var inverse 	= new THREE.Matrix4();
+     	var projview	= new THREE.Matrix4();
+     	projview.multiplyMatrices( this.camera.projectionMatrix, this.camera.matrixWorldInverse );
+        inverse.getInverse(projview);
+        //inverse matrix to unproj fragment position to world coordinates
+
+        this.uniforms[ "tColor" ].value 	= readBuffer;	//color buffer
+		this.uniforms["cameraPos" ].value.x = this.camera.position.x; 
+        this.uniforms["cameraPos" ].value.y = this.camera.position.y;
+        this.uniforms["cameraPos" ].value.z = this.camera.position.z;
+        this.uniforms["uNear" ].value 		= this.camera.near;
+        this.uniforms["uFar"  ].value 		= this.camera.far;
+        this.uniforms["inverseMat"].value 	= inverse;
 
 		if ( this.renderToScreen ) {
 			renderer.render( this.scene2, this.camera2 );
@@ -99,11 +116,14 @@ THREE.CloudPass.prototype = {
 		this.materialCloud.uniforms["uTime"].value = time;
 	},
 
-	setCameraDirection : function( x, y ){
-		this.materialCloud.uniforms["camDirec"].value.x = x;
-		this.materialCloud.uniforms["camDirec"].value.y = y;
+	setSize: function( width, height ){
+		//this.renderTargetDepth.setSize(width, height);
+		this.materialCloud.uniforms[ "resolution" ].value = new THREE.Vector2( width, height );
+	},
+
+	setCloudColor: function( bright, dark ){
+		this.materialCloud.uniforms["cloudBright"].value = new THREE.Color(bright);
+		this.materialCloud.uniforms["cloudDark" ].value  = new THREE.Color(dark);
 	}
-
-
 };
 

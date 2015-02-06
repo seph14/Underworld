@@ -6,7 +6,7 @@ var WIDTH = window.innerWidth || 2;
 var HEIGHT = window.innerHeight || ( 2 + 2 * MARGIN );
 var SCREEN_WIDTH  = window.innerWidth;
 var	SCREEN_HEIGHT = window.innerHeight - 2 * MARGIN;
-var FAR  = 5000;
+var FAR  = 3000;
 var NEAR = 1;
 var touchable;
 
@@ -61,7 +61,7 @@ function initScene() {
 	if( touchable ){
 		scene.fog 		= new THREE.Fog( 0x8a8b96, 10, FAR/4 );
 	}else{
-		scene.fog 		= new THREE.FogExp2( 0x8a8b96, 0.0009 );
+		scene.fog 		= new THREE.FogExp2( 0x8a8b96, 0.00055 );
 	}
 	
 	// CAMERA
@@ -77,12 +77,12 @@ function initScene() {
 	cameraTwo.position.set( -144.52, -394.97, -289.79 );
 	cameraTwo.lookAt( new THREE.Vector3(-688 + 160 * 0, -16, -237 + 3 * 160 ) );
 
-	fpsControl = new THREE.FirstPersonControls(cameraTwo);
-	fpsControl.movementSpeed = 110.1;
-	fpsControl.lookSpeed = 0.001;
-	fpsControl.lookVertical = true;
-	fpsControl.movementSpeed = 70;
-    fpsControl.noFly = false;
+	fpsControl 					= new THREE.FirstPersonControls(cameraTwo);
+	fpsControl.movementSpeed 	= 110.1;
+	fpsControl.lookSpeed 		= 0.001;
+	fpsControl.lookVertical 	= true;
+	fpsControl.movementSpeed	= 70;
+    fpsControl.noFly 			= false;
 
 	cameraControl = new AR.CameraControl();
 	cameraControl.addCamera(cameraOne);
@@ -121,9 +121,7 @@ function initScene() {
 	}
 
 	// RENDERER
-	//logarithmicDepthBuffer: true 
-	//for depth map which will be for rendering clouds.
-	renderer = new THREE.WebGLRenderer( { antialias: false, precision: "mediump", logarithmicDepthBuffer: true } );
+	renderer = new THREE.WebGLRenderer( { antialias: false, precision: "mediump" } );
 	renderer.setClearColor( scene.fog.color, 1 );
 	renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
 
@@ -149,11 +147,10 @@ function initScene() {
 								   stencilBuffer: 	false };
 	var renderTarget = new THREE.WebGLRenderTarget( SCREEN_WIDTH, SCREEN_HEIGHT, renderTargetParameters );
 	var renderModel  = new THREE.RenderPass( scene, camera );
-
 	renderer.autoClear = true;
 	renderModel.clear  = true;
-
 	effectCloud = new THREE.CloudPass( scene, camera, { width: SCREEN_WIDTH, height: SCREEN_HEIGHT });
+	effectCloud.setCloudColor( 0xcfc8be, 0x887f80 );
 	//effectCloud.renderToScreen = true;
 
 	effectFXAA = new THREE.ShaderPass( THREE.FXAAShader );
@@ -227,6 +224,10 @@ function onWindowResize() {
 
 	if( composer ){
 		composer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+	}
+
+	if( effectCloud ){
+		effectCloud.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
 	}
 	
 	//update with
@@ -333,11 +334,11 @@ function render() {
 
 	// render scene
 	camera.rotation.copy( cameraControl.currentCamera.rotation );
-	camera.position.set( cameraControl.currentCamera.position.x,
-						 cameraControl.currentCamera.position.y,
-						 cameraControl.currentCamera.position.z );
+	camera.position.set ( cameraControl.currentCamera.position.x,
+						  cameraControl.currentCamera.position.y,
+						  cameraControl.currentCamera.position.z );
 	//copy camera rotation + position so we can keep using composer setting
-	//where fxaa is preserved.
+	
 	effectCloud.setTime( t );
 	composer.render( 0.1 );
 
