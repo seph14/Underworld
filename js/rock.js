@@ -442,7 +442,7 @@ function LoadLightMat( texDiffuse, texNormal ){
 	return rockMat;
 }
 
-function LoadEnvCubeMat( texDiffuse, texNormal ){
+function LoadEnvCubePhysicalMat( texDiffuse, texNormal ){
 	var shader 	 = THREE.ShaderPBR[ "PBR_Env_Bump" ];
 	var uniforms = THREE.UniformsUtils.clone( shader.uniforms );
 
@@ -497,6 +497,71 @@ function LoadEnvCubeMat( texDiffuse, texNormal ){
 	uniformsmono[ "uRoughness4" ].value    	= 1.0 * 1.0 * 1.0 * 1.0;	
 	uniformsmono[ "uMetallic"  ].value    	= 1.0;	
 	uniformsmono[ "uSpecular"  ].value    	= 1.0;	
+	uniformsmono[ "uExposure"  ].value    	= 16.3375;
+	uniformsmono[ "uGamma" 	   ].value    	= 2.2;			
+	uniformsmono[ "uBaseColor"].value     	= new THREE.Color( 0xffffff );
+
+	var parametersmono = { fragmentShader: 	shadermono.fragmentShader, 
+						   vertexShader: 	shadermono.vertexShader, 
+						   uniforms: 		uniformsmono, 
+						   lights: 			false, 
+					       fog: 			true,
+					       morphTargets:    false,
+					       morphNormals:    false };
+	coreMat = new THREE.ShaderMaterial( parametersmono );
+
+	return rockMat;
+}
+
+function LoadEnvCubeMat( texDiffuse, texNormal ){
+	var shader 	 = THREE.ShaderShade[ "Env_Bump" ];
+	var uniforms = THREE.UniformsUtils.clone( shader.uniforms );
+
+	//var path = "textures/envmap/";
+	//var path = "textures/skydark/";
+	var path = "textures/reflect/";
+	var format = '.jpg';
+	var urls = [
+		path + 'px' + format, path + 'nx' + format,
+		path + 'py' + format, path + 'ny' + format,
+		path + 'pz' + format, path + 'nz' + format
+	];
+	var textureCube = THREE.ImageUtils.loadTextureCube( urls, new THREE.CubeRefractionMapping() );
+	
+	uniforms[ "uBaseColorMap" ].value 		= THREE.ImageUtils.loadTexture( "textures/" + texDiffuse );
+	uniforms[ "uBaseColorMap" ].value.wrapS = THREE.RepeatWrapping;
+	uniforms[ "uBaseColorMap" ].value.wrapT = THREE.RepeatWrapping;
+	uniforms[ "uBaseColorMap" ].value.repeat.set( 2, 2 );
+		
+	uniforms[ "uNormalMap" ].value    		= THREE.ImageUtils.loadTexture( "textures/" + texNormal  );
+	uniforms[ "uNormalMap" ].value.wrapS 	= THREE.RepeatWrapping;
+	uniforms[ "uNormalMap" ].value.wrapT 	= THREE.RepeatWrapping;
+	uniforms[ "uNormalMap" ].value.repeat.set( 2, 2 );
+	
+	uniforms[ "uCubeMapTex" ].value 		= textureCube;
+	
+	uniforms[ "uWorldTop"  ].value    		= 100.0;			
+	uniforms[ "uSunPosition"].value    		= new THREE.Vector3(0,70,0);
+	uniforms[ "uExposure"  ].value    		= 6.3375;
+	uniforms[ "uGamma" 	   ].value    		= 2.2;			
+	uniforms[ "uBaseColor"].value     		= new THREE.Color( 0x1d1b1c );		
+		
+	var parameters = { fragmentShader: 	shader.fragmentShader, 
+					   vertexShader: 	shader.vertexShader, 
+					   uniforms: 		uniforms, 
+					   lights: 			false, //temporarily disable lights - tests for performance 
+					   fog: 			true,
+					   morphTargets:    false,
+					   morphNormals:    false,
+					   shading: 		THREE.SmoothShading };
+	rockMat = new THREE.ShaderMaterial( parameters );
+
+	var shadermono 	 = THREE.ShaderShade[ "Env" ];
+	var uniformsmono = THREE.UniformsUtils.clone( shadermono.uniforms );
+
+	uniformsmono[ "uCubeMapTex" ].value 	= textureCube;
+	uniformsmono[ "uWorldTop"  ].value    	= 100.0;			
+	uniformsmono[ "uSunPosition"].value    	= new THREE.Vector3(0,70,0);
 	uniformsmono[ "uExposure"  ].value    	= 16.3375;
 	uniformsmono[ "uGamma" 	   ].value    	= 2.2;			
 	uniformsmono[ "uBaseColor"].value     	= new THREE.Color( 0xffffff );
