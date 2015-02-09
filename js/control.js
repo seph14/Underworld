@@ -227,7 +227,7 @@ function onWindowResize() {
 	}
 
 	if( effectCloud ){
-		effectCloud.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+		effectCloud.setSize( SCREEN_WIDTH * window.devicePixelRatio, SCREEN_HEIGHT * window.devicePixelRatio );
 	}
 	
 	//update with
