@@ -130,6 +130,7 @@ THREE.ShaderShade = {
 				//"vUv 			= uv;",
 				"vVertex		= modelMatrix * vec4( position, 1.0 );",
 				"vEyeDir		= normalize( cameraPosition - vVertex.xyz );",
+				"vec4 worldPosition	= vVertex;",
 	
 				"gl_Position	= projectionMatrix * viewMatrix * vVertex;",
 				THREE.ShaderChunk[ "shadowmap_vertex" ],
@@ -290,6 +291,7 @@ THREE.ShaderShade = {
 				"vUv 			= uv;",
 				"vVertex		= modelMatrix * vec4( position, 1.0 );",
 				"vEyeDir		= normalize( cameraPosition - vVertex.xyz );",
+				"vec4 worldPosition	= vVertex;",
 	
 				"gl_Position	= projectionMatrix * viewMatrix * vVertex;",
 				THREE.ShaderChunk[ "shadowmap_vertex" ],
